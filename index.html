@@ -341,11 +341,7 @@
 </footer>
 
 <script>
-// Open both by default
 document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('module-sequential').classList.add('is-open');
-  document.getElementById('module-parallel').classList.add('is-open');
-
   // Floating TOC: highlight active section on scroll
   const tocLinks = document.querySelectorAll('.toc-link[data-section]');
   const sections = [];
