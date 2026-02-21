@@ -1,0 +1,50 @@
+% Requires: \usepackage{booktabs} \usepackage{multirow} \usepackage{graphicx}
+% If you want nicer spacing: \usepackage{array}
+
+\begin{table*}[t]
+\centering
+\small
+\scalebox{0.9}{
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{l *{2}{c c c c c c c}}
+\toprule
+\multirow{3}{*}{\textbf{Omni (Model)}} 
+& \multicolumn{7}{c}{\textbf{Search}} 
+& \multicolumn{7}{c}{\textbf{Code}} \\
+\cmidrule(lr){2-8}\cmidrule(lr){9-15}
+& \multicolumn{5}{c}{\textbf{Pass@k}} & \multicolumn{2}{c}{\textbf{Self-choice}} 
+& \multicolumn{5}{c}{\textbf{Pass@k}} & \multicolumn{2}{c}{\textbf{Self-choice}} \\
+\cmidrule(lr){2-6}\cmidrule(lr){7-8}\cmidrule(lr){9-13}\cmidrule(lr){14-15}
+& \textbf{p@1} & \textbf{p@2} & \textbf{p@3} & \textbf{p@4} & \textbf{p@8} & \textbf{point-wise} & \textbf{pair-wise}
+& \textbf{p@1} & \textbf{p@2} & \textbf{p@3} & \textbf{p@4} & \textbf{p@8} & \textbf{point-wise} & \textbf{pair-wise} \\
+\midrule
+Qwen3-Next        & 0.1859 & 0.2462 & 0.2814 & 0.3116 & -- & 0.1156 & --  & -- & -- & -- & -- & -- & -- & -- \\
+Qwen3-235B        & 0.1558 & 0.2111 & 0.2362 & 0.2663 & -- & -- & --  & -- & -- & -- & -- & -- & -- & -- \\
+DeepSeek-V3.2     & -- & -- & -- & -- & -- & -- & --  & -- & -- & -- & -- & -- & -- & -- \\
+DeepSeek-R1-0528  & -- & -- & -- & -- & -- & -- & --  & -- & -- & -- & -- & -- & -- & -- \\
+Gemini-2.5 Flash  & 0.1457 & 0.1658 & 0.2010 & 0.2261 & -- & 0.1457 & 0.191  & -- & -- & -- & -- & -- & -- & -- \\
+\midrule
+\addlinespace[4pt]
+
+\multirow{3}{*}{\textbf{Omni (Model)}} 
+& \multicolumn{7}{c}{\textbf{Reason}} 
+& \multicolumn{7}{c}{\textbf{Tool-use}} \\
+\cmidrule(lr){2-8}\cmidrule(lr){9-15}
+& \multicolumn{5}{c}{\textbf{Pass@k}} & \multicolumn{2}{c}{\textbf{Self-choice}} 
+& \multicolumn{5}{c}{\textbf{Pass@k}} & \multicolumn{2}{c}{\textbf{Self-choice}} \\
+\cmidrule(lr){2-6}\cmidrule(lr){7-8}\cmidrule(lr){9-13}\cmidrule(lr){14-15}
+& \textbf{p@1} & \textbf{p@2} & \textbf{p@3} & \textbf{p@4} & \textbf{p@8} & \textbf{point-wise} & \textbf{pair-wise}
+& \textbf{p@1} & \textbf{p@2} & \textbf{p@3} & \textbf{p@4} & \textbf{p@8} & \textbf{point-wise} & \textbf{pair-wise} \\
+\midrule
+Qwen3-Next        & -- & -- & -- & -- & -- & -- & --  & 0.57 & 0.64 & 0.70 & 0.73 & -- & 0.42 & -- \\
+Qwen3-235B        & -- & -- & -- & -- & -- & -- & --  & 0.52 & 0.60 & 0.63 & 0.65 & -- & -- & -- \\
+DeepSeek-V3.2     & -- & -- & -- & -- & -- & -- & --  & 0.59 & 0.69 & 0.71 & 0.75 & -- & -- & -- \\
+DeepSeek-R1-0528  & -- & -- & -- & -- & -- & -- & --  & 0.40 & 0.47 & 0.48 & 0.53 & -- & -- & -- \\
+Gemini-2.5 Flash  & -- & -- & -- & -- & -- & -- & --  & 0.52 & 0.57 & 0.58 & 0.61 & -- & 0.46 & 0.46 \\
+\bottomrule
+\end{tabular}
+}
+\caption{Pass@k and self-choice (point-wise / pair-wise) results across domains under the Omni-agent setting.\cx{the p at k can also be a plot, and self-choice can be a seperate smalle table? I like the side by side pot of two scaling in the previous version} \cx{this table is not very important and acn discard, till rebuttal}}
+% \caption{Pass@k and self-choice (point-wise / pair-wise) results across domains under the Omni-agent setting.}
+\label{tab:omni_passk_selfchoice}
+\end{table*}

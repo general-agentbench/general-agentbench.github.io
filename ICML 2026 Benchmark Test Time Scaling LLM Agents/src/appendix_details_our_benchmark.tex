@@ -1,0 +1,83 @@
+\section{General AgentBench Implementation Details}
+
+\subsection{Tool Management}
+
+\paragraph{Tool Registration}
+The General AgentBench follows the Model Context Protocol (MCP) architecture with Host-Client-Server design. During server connection, the \textit{BenchmarkHost} creates transport connections (STDIO/HTTP), initializes \textit{ClientSession}, and discovers tools via \textit{list\_tools()}. All tools are registered to a global \textit{tool\_to\_client} routing map. 
+
+%Distraction masking is applied at schema generation time, not during registration: when \textit{get\_filtered\_tools\_schema()} is called, it first identifies required tools for the task, then randomly samples \textit{distraction\_count} tools from the remaining pool. Setting \textit{distraction\_count=-1} includes all 301 available tools. During tool invocation, \textit{route\_tool\_call()} looks up the routing map, extracts the original tool name from MCP-Bench format, and routes to the appropriate client.
+
+\paragraph{Tool Schema}
+Each tool follows OpenAI function-calling format with \textit{name}, \textit{description}, and \textit{parameters} (JSON Schema), as shown in Box~\ref{box:tool-schema}. Tools use Bedrock-compatible naming requirements ([a-zA-Z0-9\_-]+): MCP-Bench format uses \textit{ServerName\_\_tool\_name} (e.g., \textit{BioMCP\_\_think}), while Tau2 uses \textit{domain\_tool\_name} (e.g., \textit{airline\_book\_reservation}). The complete toolset in \textit{Host} contains \textbf{301 tools} across 35 servers, including BioMCP (34), Scientific\_Computing (26), Medical\_Calculator (22), NASA\_Data (21), NixOS (18), Unit\_Converter (16), tau2-retail (15), tau2-airline (14), tau2-telecom (13), and others. 
+
+%The full JSON schema consumes approximately \textbf{78,083 tokens} (GPT-4 tokenization).
+
+\begin{tcolorbox}[
+  colback=gray!5,
+  colframe=gray!70,
+  title=\textbf{An example of tool schema: get-collection-info function from Huggingface server},
+  fonttitle=\bfseries\small,
+  label=box:tool-schema,
+  breakable
+]
+\label{{box:tool-schema}}
+{\scriptsize
+\begin{verbatim}
+
+{
+    "type": "function",
+    "function": {
+      "name": "Hugging_Face__get-collection-info",
+      "description": "Get detailed information about a specific collection",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "namespace": {
+            "type": "string",
+            "description": "The namespace of the collection (user or organization)"
+          },
+          "collection_id": {
+            "type": "string",
+            "description": "The ID part of the collection"
+          }
+        },
+        "required": [
+          "namespace",
+          "collection_id"
+        ]
+      }
+    }
+}
+\end{verbatim}
+}
+
+
+
+\end{tcolorbox}
+
+\paragraph{Description Compression and Minimal Strategy}
+To reduce context consumption, we implement multi-level compression. The \textit{--compress-tools} option truncates descriptions to target number of characters and removes parameter defaults, achieving 18.6\% token reduction. If the description of the first sentence is truncated in the middle, we will keep the first sentence for tool loading.. For self-choice evaluation, we adopt the \textit{--minimal-tools} strategy: converting JSON schema to plain text format (\textit{tool\_name(params): short\_desc}), retaining only tool names, 50-character descriptions, and parameter names. This achieves \textbf{90.1\% token reduction}, saving approximately 70K tokens. 
+
+%Additionally, minimal mode truncates trajectory outputs to 500 characters and limits task descriptions to 8,000 characters, enabling efficient self-choice evaluation within context budgets.
+
+
+
+\subsection{Benchmark Integration Details}
+
+\paragraph{User Simulator Implementation in Tau2Bench}
+Tau2Bench requires multi-turn conversational interactions between the agent and a simulated user. We implement this through \textit{Tau2UserSimulatorAdapter}, which wraps the original Tau2 \textit{UserSimulator}. During each conversation turn, the adapter converts the agent's response to Tau2's \textit{AssistantMessage} format, calls \textit{generate\_next\_message(message, state)} to obtain the user response, and maintains conversation state across turns. User-side tool execution (e.g., checking order status) is routed through MCP internal callbacks, which ensures proper environment initialization. 
+%The user simulator LLM is configured independently via \textit{--user-model} and \textit{--user-temperature} (default 0.0 for deterministic behavior), with \textit{--simulation-seed} ensuring reproducibility aligned with the original tau2-bench framework.
+
+\paragraph{Docker Environment Interaction}
+Both Terminal Bench and SWEBench employ Docker Container Bridge Mode for isolated task execution. The MCP servers run as persistent host processes, interacting with task containers via \textit{docker exec}. Public tools exposed to agents include \textit{execute\_bash}, \textit{read\_file}, \textit{write\_file}, and \textit{finish}(SWE-Bench). 
+% Internal tools prefixed with \textit{\_\_} (invisible to agents) enable container lifecycle management: \textit{\_\_switch\_container} cleans up the previous container and starts a new one using Docker Compose, while \textit{\_\_run\_tests} executes the pytest harness. 
+Each container receives a unique UUID-suffixed project name to support parallel experiments. This MCP Process Mode design avoids server restart overhead across tasks while maintaining complete environment isolation through Docker.
+
+\paragraph{Evaluators}
+The General Agent system adopts a native evaluator delegation strategy, directly invoking each benchmark's original evaluation code rather than reimplementing evaluation logic. For Tau2Bench, we compute rewards as the product of environment state matching (DB\_CHECK), action sequence validation, and communication checks. SWEBench and Terminal Bench use Docker Bridge Mode: MCP servers run as persistent host processes, executing \textit{pytest} harnesses in task containers via \textit{docker exec}, then parsing results using toolsets in original benchmark implementation. Search benchmarks (BrowseComp, Mind2Web, WebVoyager, GAIA) use their original \texttt{eval\_scripts} with LLM-based semantic equivalence or rubric evaluation. All evaluators produce binary rewards (0/1) except MCPBench (continuous 0-1). 
+
+% This delegation approach ensures complete result comparability with published benchmark scores.
+
+
+
+

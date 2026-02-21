@@ -1,0 +1,246 @@
+# Original MCP-Framework construction description
+
+To better simulate realistic agentic scenarios where an agent must select from a large pool of tools and execute tasks accordingly, we design a unified architecture that centrally manages all benchmarks and exposes a standardized interface for tool selection and task execution. An overview of the architecture is illustrated in Figure~\ref{fig:omni-setting}. 
+
+Within this framework, we adopt the MCP architecture as the backbone for benchmark management. Benchmark environments are instantiated as an MCP server, and all servers are connected to a client module hosted within a centralized \textit{Host}. The Host is responsible for unified lifecycle management of all clients and serves as the sole interaction interface for the \textit{Omni Agent}. Through interactions with the Host, the agent conducts benchmark evaluations without directly accessing individual environments.
+
+Crucially, the Host functions as an abstraction layer between the agent and heterogeneous benchmark environments. A global tool registry maintained by the Host records all tools exposed by each server, along with their corresponding server mappings. As a result, the agent is presented with a unified view of all available tools across benchmarks. When the model invokes a tool during interaction, the Host resolves the call via the tool registry and routes the request to the appropriate server for execution. 
+%This design decouples tool selection from environment-specific implementations, enabling scalable and extensible agentic evaluation.
+
+% \paragraph{Benchmark Integration Strategy}
+% Different benchmarks are integrated into the MCP-based architecture using tailored strategies. For MCP-Bench, which natively follows the MCP design, we directly incorporate its existing servers into our framework. For Tau2-Bench, due to the independence of its underlying databases, we treat each domain as an individual server. All remaining benchmarks are integrated as standalone servers. This unified yet flexible integration strategy allows diverse agentic environments to coexist under a single execution and interaction paradigm.
+
+
+# transfer
+
+\subsection{Transferability of Long-Context Abilities from Static to Agentic Benchmarks}\label{3.3}
+
+\cx{this subsection now is not as important as we thought before. we can get this one in one or two paragraphs. Just showing the non correlation is strong enough to tell the differences (and previous experiment have shown the movement from single to general agents, but perhaps here we can add the correlation with single agent setup too, (if there is time, right now probably no, and wait for rebuttal)}
+
+We argue long-context capability is a fundamental requirement for general agents, as unified toolsets and accumulated multi-turn interactions can rapidly extend the effective context length during real-world use. Although numerous long-context benchmarks have been proposed, it remains unclear whether performance measured under \emph{static} long-context settings meaningfully transfers to \emph{agentic} long-context scenarios, where the interaction structure and decision-making requirements differ substantially. To study this question, we incorporate three established non-agentic benchmarks to evaluate static long-context proficiency and examine how their results correlate with performance on Omni AgenticBench. Specifically, \textbf{LongBench-v2} assesses long-document comprehension in a multiple-choice format. \textbf{MRCR} evaluates multi-needle retrieval, extending the classic Needle-in-a-Haystack task by embedding multiple target spans within large contexts. \textbf{HELMET}, using the “generation with citations” and “passage reranking” subsets, measures higher-order information-seeking behavior that requires precise grounding and discriminative reasoning beyond simple retrieval. Together, these benchmarks provide broad coverage of the conventional static long-context evaluation taxonomy.
+
+We analyze correlations between scores on these three benchmarks and four agentic domains on ten models to assess the transferability of long-context abilities. Rather than using Spearman rank correlation, we compute Pearson correlation over pairwise absolute performance differences. This is motivated by the substantial variation in model scale across our evaluation set. Relying solely on rank-based metrics can obscure differences in long-context capability that arise from scale effects. Since our goal is to assess whether these benchmarks can reveal meaningful performance differences between models, we compute pairwise Pearson correlations over absolute performance differences. Detailed results for the three long-context benchmarks are provided in the Appendix.
+
+As shown in Figure~\ref{fig:corr}, all three static long-context benchmarks exhibit weak correlation with agentic domains overall (LongBench-v2 ranging from 0.08 to 0.29, HELMET ranging from 0.13 to 0.46, and MRCR ranging from $-0.17$ to 0.68), indicating that the capabilities measured by static long-context benchmarks do not readily transfer to agentic long-context settings. The highest correlation is observed between MRCR and the reasoning domain (0.68), which is expected: tasks in the reasoning domain primarily require models to traverse long mathematical documents, extract relevant information, and perform computation without necessarily invoking external tools—closely matching the core characteristics of MRCR. This alignment is further reflected by the low correlation between the reasoning domain and other agentic domains. Additionally, the coding domain exhibits the weakest correlation with static long-context benchmarks, suggesting that successful code generation and debugging demand capabilities beyond long-context comprehension alone, such as structured planning and precise execution. Finally, the tool-use domain shows strong correlations with other agentic domains, highlighting tool invocation as a fundamental and shared capability underlying agentic task performance.
+
+
+# Previous main results description
+
+Table~\ref{tab:main_omni_results} summarizes the performance of all evaluated models. Here, $B$ denotes the \emph{Baseline} setting, which follows the original benchmark protocol with domain-specific toolsets and policies predefined for each task. In contrast, $O$ denotes the \emph{Omni-agent} setting—our primary evaluation scenario—in which agents respond to user queries using a unified policy and a shared toolset, making it a more general setting.
+
+Overall, we observe substantial performance degradation for most agents under the Omni-agent setting, with average relative drops ranging from 15\% to 30.8\%. The severity of degradation varies considerably across models. For instance, Gemini-2.5-Pro suffers a drop of over 60\% on the reasoning domain, falling from top-tier performance in the baseline setting to near-average performance under the Omni-agent setting. These results highlight a critical gap between benchmark performance and real-world deployment. While models can perform well when evaluated as specialized agents with predefined, domain-restricted toolsets and policies, they often fail to reliably execute the same tasks under more general and unconstrained interaction contexts. This mismatch suggests that static benchmark evaluations may substantially overestimate general agentic capability when interacting with human users. Notably, Qwen3-Next and Claude exhibit performance improvements in both the search and reasoning domains under the Omni-agent setting. A closer examination of their execution trajectories reveals that these gains arise from effective \textbf{cross-domain tool usage}: the agents actively leverage tools originally intended for other domains to support search and reasoning, resulting in more accurate outcomes than those achieved under domain-restricted tool configurations. We argue that such behavior more faithfully reflects an agent’s upper-bound capability, as it captures the model’s intrinsic ability to dynamically select and repurpose tools beyond predefined domain boundaries. These findings underscore the importance of evaluation settings that minimize domain priors and more closely approximate real-world tool availability. Further analysis is provided in Section~5.5.
+
+# Original description of tts
+
+% Crucially, we do not verify the correctness of the agent’s intermediate answers during this process. This allows us to observe whether the agent possesses the internal consistency to maintain a correct solution or the self-correction capability to identify and revise errors based on its own reasoning history. 
+
+% To quantify these trends, we plot task accuracy against the number of independent samples ($K$) for parallel scaling and the cumulative context length for sequential scaling. 
+% Notably, in the reason domain where the initial context already exceed 128K tokens and external environmental feedback is absent, we utilize the number of retry attempts as the primary scaling indicator. This provides a more meaningful measure of computational effort than context growth alone in dense-input scenarios. 
+
+# Original self-choice
+
+\subsection{Self-Choice Results}
+
+In the absence of external oracles or human feedback to identify the correct sample—particularly in real-world deployments of parallel scaling—agents must be able to self-judge and select the best result from their own generated trajectories. To evaluate this capability, we introduce a \textbf{Self-Choice} setting, in which the agent evaluates its parallelly sampled outputs using one of two strategies:
+
+\textbf{(1) Point-wise choice.} The agent independently evaluates each sampled trajectory and assigns a binary judgment (correct or incorrect) to each. Performance is measured by the alignment between the model’s judgments and the oracle labels, averaged over trajectories with correct oracle labels only.
+
+\textbf{(2) Pair-wise choice.} The agent compares two sampled trajectories at a time and iteratively promotes the superior one, following a bubble sort style selection process. After $K-1$ pairwise comparisons, the agent selects a single trajectory as the final output, and performance is evaluated based on the correctness of this selected sample.
+
+While parallel sampling increases the probability of generating successful trajectories in agentic tasks (as shown in Section~4.1), effective deployment of test-time scaling additionally requires agents to reliably evaluate and select among these candidates. Robust self-choice is therefore critical not only for improving user-facing performance under parallel scaling, but also for enabling self-improvement in non-verifiable environments, as envisioned in recent test-time training paradigms.
+
+In Figure~\ref{fig:self-choice}, we observe that while \textbf{Best@K} increases monotonically with larger $K$, the scaling trend of \textbf{Self-Choice} performance consistently lags behind. Although some self-choice results continue to improve monotonically, others degrade as $K$ increases—for example, DeepSeek-R1 in the search domain, and both DeepSeek-R1 and DeepSeek-v3.2 in the tool-use domain. As $K$ grows, self-choice gains gradually approach saturation and fail to keep pace with the continued improvement of Best@K. Notably, the coding domain exhibits the smallest gap between Best@K and Self-Choice performance, indicating that agents are comparatively better at judging correctness in coding tasks. With the exception of Qwen3-Next and Qwen3-235B in the search domain, point-wise self-choice consistently outperforms pair-wise self-choice. We attribute this gap to limitations in long-context reasoning: pair-wise comparison requires processing two full trajectories simultaneously, substantially increasing contextual load and making it more difficult for the agent to reliably identify the superior solution.
+
+# Attention part
+
+Across both parallel and sequential test-time scaling settings, we observe that Qwen3-Next exhibits relatively weaker performance gains compared to other models. To better understand this behavior, we analyze the phenomenon from the perspective of the attention mechanism. Qwen3-Next adopts a hybrid architecture that combines Gated DeltaNet and Gated Attention in a 3:1 ratio, aiming to balance computational efficiency with contextual recall. However, in long-context agentic scenarios, the ability to retrieve information from distant tokens is particularly critical. We therefore investigate whether this architectural choice affects long-range attention behavior.
+
+Specifically, we analyze the average attention distance during the final reasoning step, and compare Qwen3-Next against Qwen3-235B-A22B, which serves as a full-attention baseline. For each model, we focus on the final turn in which the model produces its answer. For every full-attention head, we record the top-$k$ attended tokens and compute their token-distance relative to the beginning of the final output span. For Gated DeltaNet, which does not explicitly expose standard attention weights, we adopt a mathematically equivalent procedure to recover the effective top-$k$ contributing tokens and compute the corresponding distances (details provided in Appendix~X).
+
+Figure~\ref{fig:attention_analysis} visualizes the resulting heatmaps. We find that full attention consistently exhibits larger average attention distances than Gated DeltaNet. This is evident both in the comparison between Qwen3-235B and Qwen3-Next, as well as within Qwen3-Next itself when contrasting its Gated Attention and DeltaNet components. These results indicate that full attention is more effective at capturing long-range dependencies, which likely contributes to its superior scaling consistency under long-context agentic settings.
+
+# Old attention analysis
+
+% \section{Attention Behavior Analysis}\label{section5}
+
+% \begin{figure*}[h]
+%     \centering
+
+%     \begin{subfigure}{0.9\linewidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{figs/attention_analysis_final_qwen3_235B.pdf}
+%         \caption{Qwen3-235B}
+%         \label{fig:attn_qwen3_235b}
+%     \end{subfigure}
+
+%     \vspace{6pt}
+
+%     \begin{subfigure}{0.9\linewidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{figs/attention_analysis_final_qwen3_next.pdf}
+%         \caption{Qwen3-Next}
+%         \label{fig:attn_qwen3_next}
+%     \end{subfigure}
+
+%     \caption{Attention analysis under the Omni-agent setting.
+%     Top: Qwen3-235B. Bottom: Qwen3-Next.}
+%     \label{fig:attention_analysis}
+% \end{figure*}
+
+% In this section, we demonstrate how Omni AgenticBench can be used as a testbed for analyzing model behaviors in agentic settings. Our analysis focuses on identifying general attention patterns during agentic reasoning. We study two groups of models and compare standard scaled dot-product attention with recent attention innovations, including linear and sparse attention mechanisms. The first group consists of Qwen3-Next and Qwen3-235B-A22B, where Qwen3-Next adopts a 3:1 mixture of linear DeltaNet attention and gated scaled dot-product attention. The second group includes DeepSeek-V3.2 and DeepSeek-V3.1-Terminus, where DeepSeek-V3.2 employs a sparse attention mechanism. We first describe the analysis methodology and then present the results and key findings.
+
+% \subsection{Extracting Top-K Attention Tokens for Reasoning Behavior}
+
+% The attention analysis is performed on inference trajectories from Omni AgenticBench. For each domain, we randomly sample 25 trajectories. Since attention patterns depend strongy on the specific portion of the text, we adopt the framework by \citet{jin2025beneficial} to extract reasoning-behavior sentences from each trajectory. These sentences correspond to key decision-making steps during task execution, where the model actively reasons over its accumulated context. For each reasoning sentence, we iterate over all tokens within the sentence. For every token, we compute and store the attention scores over the preceding context. We then average the attention scores across tokens in the reasoning sentence, select the top-K ($K=128)$ attended tokens, and record their corresponding token indices. This process is applied across all layers and attention heads.
+
+% We evaluate attention behavior using two metrics: 1) Mean Distance. We compute the token distance between each top-K attended token and the reasoning sentence, weighted by its attention score. This metric captures how far back each attention block attends when the agent makes a key decision, effectively measuring the model’s valid view over the context. 2)Top-K Overlap. We compute the overlap of top-K attended tokens both across layers (inter-layer) and across heads within the same layer (intra-layer). Higher overlap indicates that different heads or layers attend to similar contextual tokens, suggesting more similar functional roles.
+
+% \subsection{Sparse Attention vs. Full Attention}
+
+% \subsection{Linear Attention vs. Full Attention}
+
+% In the leftmost plot of Figure~\ref{fig:attention_analysis}, we visualize the mean attention distance for each head across layers. Full attention exhibits a consistently larger mean distance on average, with only a few exceptions in early layers and around layer 70. In most layers, the majority of heads attend to long-range context, while a small subset is responsible for local patterns. This behavior is also observed in the gated full-attention layers of Qwen3-Next, which occur every four layers. These results indicate that full attention maintains a broader valid view than linear attention, consistent with the convolution-like receptive field constraints imposed by DeltaNet-style linear attention\cite{gu2024mamba}.
+
+% The two rightmost plots show top-K token overlap statistics. For intra-layer overlap, full attention displays a characteristic “V-shaped” curve: middle-layer heads attend to more diverse patterns, while later layers converge to similar tokens, reflecting increased certainty near the final decision stage. In contrast, linear attention does not exhibit a clear structural pattern and shows higher average intra-layer overlap, suggesting reduced head specialization. For inter-layer overlap, full attention exhibits a “low-to-high” trend across layers, indicating that nearby layers share similar functions, while functional divergence accumulates with depth. In linear attention models, DeltaNet layers show very low overlap with gated full-attention layers. While DeltaNet layers maintain high overlap across distant layers, full-attention layers preserve their original inter-layer structure.
+
+% Overall, these observations suggest that linear attention exhibits weaker functional differentiation across heads and layers, as well as reduced long-context utilization in agentic tasks, compared to full attention mechanisms.
+
+% % \definecolor{neg}{HTML}{C00000} % Red for performance drop
+% % \newcommand{\loss}[1]{\color{neg}#1} % Helper command for red text
+
+% % \begin{table*}[t]
+% % \centering
+% % \small
+% % \caption{Performance change under the Omni-agent setting. We report baseline ($B$), Omni-agent ($O$), relative degradation ($\Delta\%$), and the overall average relative change across available tasks. Red indicates a performance drop.}
+% % \label{tab:degradation}
+% % \setlength{\tabcolsep}{3pt}
+% % \begin{tabular}{@{} l *{4}{c c r} r @{}}
+% % \toprule
+% % \multirow{2.5}{*}{\textbf{Models}} 
+% % & \multicolumn{3}{c}{\textbf{Search}} 
+% % & \multicolumn{3}{c}{\textbf{Code (Terminal)}} 
+% % & \multicolumn{3}{c}{\textbf{Reasoning}} 
+% % & \multicolumn{3}{c}{\textbf{Tool-call (MCP)}} 
+% % & \multirow{2.5}{*}{\textbf{Avg. $\Delta\%$}} \\
+% % \cmidrule(lr){2-4} 
+% % \cmidrule(lr){5-7} 
+% % \cmidrule(lr){8-10} 
+% % \cmidrule(lr){11-13}
+% %  & $B$ & $O$ & $\Delta\%$ 
+% %  & $B$ & $O$ & $\Delta\%$ 
+% %  & $B$ & $O$ & $\Delta\%$ 
+% %  & $B$ & $O$ & $\Delta\%$ 
+% %  &  \\
+% % \midrule
+% % Qwen3-Next        
+% % & 0.161 & 0.178 & +10.6 
+% % & 0.188 & 0.117 & \loss{-37.8} 
+% % & 0.440 & {--} & {--} 
+% % & 0.633 & 0.505 & \loss{-20.2} 
+% % & \loss{-15.8} \\
+% % DeepSeek-V3.2     
+% % & 0.246 & 0.121 & \loss{-50.8} 
+% % & 0.288 & 0.063 & \loss{-78.1} 
+% % & 0.173 & {--} & {--} 
+% % & 0.617 & 0.515 & \loss{-16.5} 
+% % & \loss{-48.5} \\
+% % Gemini 2.5-Pro    
+% % & 0.234 & 0.191 & \loss{-18.4} 
+% % & 0.263 & 0.263 & \loss{-2.2}  
+% % & 0.613 & 0.240 & \loss{-60.8} 
+% % & 0.661 & 0.501 & \loss{-24.2} 
+% % & \loss{-26.4} \\
+% % Claude Haiku 4.5  
+% % & 0.236 & 0.266 & +12.7 
+% % & 0.350 & 0.238 & \loss{-32.0} 
+% % & 0.547 & 0.347 & \loss{-36.6} 
+% % & 0.649 & 0.512 & \loss{-21.1} 
+% % & \loss{-19.3} \\
+% % Claude Sonnet 4.5 
+% % & 0.261 & {--} & {--}  
+% % & 0.425 & 0.400 & \loss{-5.9}  
+% % & 0.320 & 0.360 & +12.5 
+% % & 0.681 & 0.581 & \loss{-14.7} 
+% % & \loss{-2.7} \\
+% % \bottomrule
+% % \end{tabular}
+% % \end{table*}
+
+
+
+
+# Old main results
+
+
+\section{Main results}
+
+In this section, we present overall results on \textbf{General AgentBench}, followed by a comparison with results on the same questions evaluated under prior standard settings, to illustrate the gap between domain-specific and general-purpose LLM agents.
+
+\subsection{Main Results}\label{3.1}
+
+Table~\ref{tab:omni_only_domain_avg} summarizes the performance of all evaluated models. Claude Sonnet 4.5 achieves the best overall performance, driven by its strong results in the tool-use and coding domains. GPT-5 attains the highest scores on the Search and Reason domains, highlighting its strengths in information retrieval and complex reasoning. Among open-source models, DeepSeek-V3.2, equipped with sparse attention, outperforms both Gemini variants, and its high efficiency further positions it as a strong competitor in realistic agentic settings. Qwen3-Next outperforms Gemini 2.5-Flash and is competitive with Gemini 2.5-Pro; its hybrid architecture suggests a promising direction for improving both performance and efficiency. Finally, we observe that most models exhibit relatively low performance on BrowseComp, indicating that retrieving rare and precise information beyond in-domain training data remains a major bottleneck for current LLM-based agents.
+
+% \cx{the current set of Table 2 makes it too much zoomed in the comparison between omni and single agent setup, and same time kind of make our main contribution feels narrow. (this is dangerous and must fix) Also only showing category average makes it look like our work is limited to a few tasks. let's make a full tabl about our results of the full omi setting, and then plot the drops from single to omni in another figure, per category, thus table 2 focuses on the overal picture, and the plot shows the tread differences, you can plot to show the up and down trends of each model in category. thus you can break down the discussion in this section, which is way to long, into two parts: 1) the overal performnace and model versus model trend, 2) the movement of single to omni}\xiaochuan{check}
+
+% \begin{center}
+% \fbox{
+% \begin{minipage}{0.95\linewidth}
+% \textbf{TAKEAWAY.}
+% Strong performance as a \emph{specialized agent} does not translate into robust behavior as a \emph{general agent}: models that excel under domain-specific tools and policies often degrade substantially when required to operate in open-ended, domain-agnostic interaction settings.
+% \end{minipage}
+% }
+% \end{center}
+
+% Considering
+% We further analyze model performance using a \textbf{Consistency–Accuracy Index} (CAI) that captures both overall ranking and stability across tasks. Let $r_{ij}$ denote the rank of model $i$ on task $j$. For example, $r_{\text{GPT-5, Search}} = 1$ because GPT-5 attains the top rank on Search domain. We convert ranks into scores via $g_{ij} = N + 1 - r_{ij}$ where $N$ is the total number of models, so larger values indicate better performance. We then define the CAI for model $i$ as
+% $$
+% \mathrm{CAI}_i = \frac{\mathbb{E}_{j \sim T}[g_{ij}]}{1 + \sigma_i},
+% $$
+% where $\mathbb{E}_{j \sim T}[g_{ij}]$ is the average score of $\text{model}_i$ over all tasks, and $\sigma_i = \mathrm{std}(g_{ij})$ is the standard deviation of its scores. A higher CAI indicates a model that is both more accurate on average and more stable across heterogeneous benchmarks.
+    
+% Figure~\ref{fig:model_consistency} visualizes each model’s mean and variance of their  ranking, with CAI encoded via circle color. We observe that GPT-5 and Claude 4.5 Haiku demonstrate strong overall accuracy and stability. In contrast, DeepSeek-R1 consistently underperforms relative to other models. Sonnet 4.5 and DeepSeek-V3.2 show high variance, indicating unstable performance across tasks, whereas Qwen3-Next and Gemini 2.5-Pro strike a more balanced accuracy–stability tradeoff.
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=\linewidth]{figs/model_consistency.pdf}
+%     \caption{Model consistency \cx{can be a much smaller figure}}
+%     % \caption{Model consistency}
+%     \label{fig:model_consistency}
+% \end{figure}
+
+\subsection{Comparison between Single-Agent and General-Agent Settings}\label{3.2}
+
+We further analyze performance changes when models are evaluated as \emph{specialized agents} for a specific domain versus as \emph{general agents} operating under a unified context with shared toolsets. Figure~\ref{fig:domain_degradation} reports the relative performance change for each model across domains, while Figure~\ref{fig:mean_degradation} summarizes the mean degradation aggregated over all domains.
+
+Overall, most agents experience substantial performance degradation under the general-agent setting, with average relative drops ranging from 15\% to 30.8\%. The magnitude of degradation varies significantly across models. For example, \textbf{Gemini 2.5-Pro} suffers a drop of over 60\% on the reasoning domain, falling from top-tier performance in the baseline setting to near-average performance when evaluated as a general agent. This discrepancy highlights a critical gap between static benchmark evaluations and real-world deployment: while models may perform well as specialized agents, they often fail to reliably execute the same tasks under open-ended and unconstrained interaction contexts. \textbf{Claude Sonnet 4.5} exhibits notably stronger robustness, with only a 2.0\% average degradation, making it a comparatively stable and comprehensive general-agent candidate.
+
+Interestingly, \textbf{Qwen3-Next} and \textbf{Claude} demonstrate performance improvements in both the search and reasoning domains under the general-agent setting. A closer inspection of their execution trajectories reveals that these gains stem from effective \textbf{cross-domain tool usage}: the agents actively leverage tools originally designed for other domains to support search and reasoning, yielding more accurate outcomes than those obtained under domain-restricted tool configurations. We argue that such behavior better reflects an agent’s upper-bound capability, as it captures the intrinsic ability to dynamically select and repurpose tools beyond predefined domain boundaries. These results further underscore the importance of evaluation settings that minimize domain priors and more closely approximate real-world tool availability. 
+% Additional analysis is provided in Section~5.5.
+
+% \cx{this subsection now is not as important as we thought before. we can get this one in one or two paragraphs. Just showing the non correlation is strong enough to tell the differences (and previous experiment have shown the movement from single to general agents, but perhaps here we can add the correlation with single agent setup too, (if there is time, right now probably no, and wait for rebuttal)}\xiaochuan{check}
+
+
+% \begin{center}
+% \fbox{
+% \begin{minipage}{0.95\linewidth}
+% \textbf{TAKEAWAY.}
+% Strong performance on static long-context benchmarks does not reliably transfer to agentic long-context settings. Without consistent reasoning and effective tool-use across multi-turn interactions, long-context advantages are largely diminished in general agent workflows.
+% \end{minipage}
+% }
+% \end{center}
+
+
+# Old sequential scaling
+
+\paragraph{Sequential Scaling.}
+Sequential scaling exhibits a markedly different behavior from parallel scaling. Despite allocating additional computation for iterative reasoning and reflection, we observe little to no consistent performance improvement. For example, Gemini2.5-Flash shows a marginal improvement in the search domain, increasing accuracy only from 0.16 to 0.18. DeepSeek-V3.2 demonstrates a sustained and noticeable improvement in the search domain up to a context length of 128K tokens, after which performance declines. Overall, sequential scaling behaviors fall into two distinct regimes:
+
+\textbf{Saturation and degradation.}  
+In domains such as coding, models initially benefit from additional reasoning steps, exhibiting trends similar to parallel scaling. However, beyond a certain turning point, performance consistently deteriorates as interaction and context continue to grow. Notably, once performance begins to degrade, it does not recover with further computation, suggesting that agents struggle to maintain stable reasoning when exposed to overly long and complex interaction histories.
+
+\textbf{Stagnant fluctuation.}  
+In other domains, such as reasoning, performance fluctuates within a narrow range without a clear upward trend, regardless of the amount of additional computation. In these cases, agents tend to repeatedly succeed on queries they already handle well, while failing to improve on previously unsuccessful cases. We attribute this behavior to a limited capacity for exploring novel solution paths within an extended interaction trace.
+
+We further examine LLM agents’ performance relative to their \emph{inherent context length}, shown in Figure~\ref{fig:inherent_context}. We define inherent context length as the total context length naturally accumulated by an agent when completing a task without any artificial constraints on interaction depth. As shown in the figure, performance typically improves as context length approaches this inherent point, but either saturates or degrades when the context is extended beyond it.
+
+Overall, these results indicate that simply allocating more computation by extending raw interaction history rarely yields meaningful gains. Instead, long-horizon, interactive agentic tasks introduce unique challenges in context utilization and stability, underscoring the need for more effective context management and reasoning control mechanisms.

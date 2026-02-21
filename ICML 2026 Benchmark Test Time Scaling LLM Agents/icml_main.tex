@@ -1,0 +1,260 @@
+%%%%%%%% ICML 2026 EXAMPLE LATEX SUBMISSION FILE %%%%%%%%%%%%%%%%%
+
+\documentclass{article}
+
+% Recommended, but optional, packages for figures and better typesetting:
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{booktabs} % for professional tables
+
+% hyperref makes hyperlinks in the resulting PDF.
+% If your build breaks (sometimes temporarily if a hyperlink spans a page)
+% please comment out the following usepackage line and replace
+% \usepackage{icml2026} with \usepackage[nohyperref]{icml2026} above.
+\usepackage{hyperref}
+
+
+% Attempt to make hyperref and algorithmic work together better:
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+% Use the following line for the initial blind version submitted for review:
+% \usepackage{icml2026}
+
+% For preprint, use
+\usepackage[preprint]{icml2026}
+
+% If accepted, instead use the following line for the camera-ready submission:
+% \usepackage[accepted]{icml2026}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{amsthm}
+
+
+% if you use cleveref..
+\usepackage[capitalize,noabbrev]{cleveref}
+
+% self-added packages
+\usepackage{tabularx}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage[many,most]{tcolorbox}
+\usepackage{siunitx}
+\usepackage[table]{xcolor}
+\usepackage{svg} % Allows inclusion of .svg images
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{arydshln}
+\usepackage{xurl}
+\usepackage{amsfonts}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{setspace}
+
+% \newtcolorbox[auto counter, number within=section]{NewBox}[2]{%
+%   float*, width=\textwidth,
+%   colback=white, colframe=black,
+%   colbacktitle=white, coltitle=black,
+%   fonttitle=\bfseries,
+%   boxrule=1.0pt,
+%   leftupper=0.5em, rightupper=0.5em,
+%   title={#1},
+%   label={#2},
+% }
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% THEOREMS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+% Todonotes is useful during development; simply uncomment the next line
+%    and comment out the line below the next line to turn off comments
+%\usepackage[disable,textsize=tiny]{todonotes}
+\usepackage[textsize=tiny]{todonotes}
+
+\definecolor{midnightgreen}{rgb}{0.0, 0.29, 0.33}
+\newcommand{\cx}[1]{\textcolor{midnightgreen}{\bf\small [#1 --cx]}}
+\newcommand{\xiaochuan}[1]{\textcolor{red}{\bf\small [#1 --xiaochuan]}}
+\newcommand{\ryan}[1]{\textcolor{cyan}{\bf\small [#1 --ryan]}}
+\newcommand{\haok}[1]{\textcolor{purple}{\bf\small [#1 --haok]}}
+\newcommand{\andy}[1]{\textcolor{magenta}{\bf\small [#1 --andy]}}
+\newcommand{\abhijay}[1]{\textcolor{teal}{\bf\small [#1 --abhijay]}}
+\newcommand{\pranav}[1]{\textcolor{orange}{\bf\small [#1 --pranav]}}
+
+
+% The \icmltitle you define below is probably too long as a header.
+% Therefore, a short form for the running title is supplied here:
+% \icmltitlerunning{Submission and Formatting Instructions for ICML 2026}
+
+\begin{document}
+
+\twocolumn[
+  \icmltitle{Benchmark Test-Time Scaling of General LLM Agents}
+
+  % It is OKAY to include author information, even for blind submissions: the
+  % style file will automatically remove it for you unless you've provided
+  % the [accepted] option to the icml2026 package.
+
+  % List of affiliations: The first argument should be a (short) identifier you
+  % will use later to specify author affiliations Academic affiliations
+  % should list Department, University, City, Region, Country Industry
+  % affiliations should list Company, City, Region, Country
+
+  % You can specify symbols, otherwise they are numbered in order. Ideally, you
+  % should not use this facility. Affiliations will be numbered in order of
+  % appearance and this is the preferred way.
+  \icmlsetsymbol{equal}{*}
+
+  \begin{icmlauthorlist}
+    \icmlauthor{Xiaochuan Li}{lti}
+    \icmlauthor{Ryan Ming}{lti}
+    \icmlauthor{Pranav Setlur}{lti}
+    \icmlauthor{Abhijay Paladugu}{lti}
+    \icmlauthor{Andy Tang}{lti}
+    \icmlauthor{Hao Kang}{lti}
+    \\
+    \icmlauthor{Shuai Shao}{meta}
+    \icmlauthor{Rong Jin}{meta}
+    \icmlauthor{Chenyan Xiong}{lti}
+  \end{icmlauthorlist}
+
+  \icmlaffiliation{lti}{Language Technologies Institute, School of Computer Science, Carnegie Mellon University}
+  \icmlaffiliation{meta}{Meta. All experiments, data collection, and processing activities were conducted by Carnegie Mellon University. Meta was involved solely in an advisory role.}
+  % \icmlaffiliation{sch}{School of ZZZ, Institute of WWW, Location, Country}
+
+  \icmlcorrespondingauthor{Xiaochuan Li}{xiaochu4@andrew.cmu.edu}
+  % \icmlcorrespondingauthor{Firstname2 Lastname2}{first2.last2@www.uk}
+
+  % You may provide any keywords that you find helpful for describing your
+  % paper; these are used to populate the "keywords" metadata in the PDF but
+  % will not be shown in the document
+  \icmlkeywords{Machine Learning, ICML}
+
+  \vskip 0.3in
+]
+
+% this must go after the closing bracket ] following \twocolumn[ ...
+
+% This command actually creates the footnote in the first column listing the
+% affiliations and the copyright notice. The command takes one argument, which
+% is text to display at the start of the footnote. The \icmlEqualContribution
+% command is standard text for equal contribution. Remove it (just {}) if you
+% do not need this facility.
+
+% Use ONE of the following lines. DO NOT remove the command.
+% If you have no special notice, KEEP empty braces:
+\printAffiliationsAndNotice{}  % no special notice (required even if empty)
+% Or, if applicable, use the standard equal contribution text:
+% \printAffiliationsAndNotice{\icmlEqualContribution}
+
+\begin{abstract}
+
+LLM agents are increasingly expected to function as general-purpose systems capable of resolving open-ended user requests. While existing benchmarks focus on domain-aware environments for developing specialized agents, evaluating general-purpose agents requires more realistic settings that challenge them to operate across multiple skills and tools within a unified environment. We introduce General AgentBench, a benchmark that provides such a unified framework for evaluating general LLM agents across search, coding, reasoning, and tool-use domains. Using General AgentBench, we systematically study test-time scaling behaviors under sequential scaling (iterative interaction) and parallel scaling (sampling multiple trajectories). Evaluation of ten leading LLM agents reveals a substantial performance degradation when moving from domain-specific evaluations to this general-agent setting. Moreover, we find that \textbf{neither scaling methodology yields effective performance improvements in practice}, due to two fundamental limitations: context ceiling in sequential scaling and verification gap in parallel scaling. Code is publicly available at \url{https://github.com/cxcscmu/General-AgentBench}.
+
+% General agents must resolve real-world user requests that are complex in both content and task category. However, existing agentic evaluations primarily emphasize the former and are typically conducted in isolated environments, which naturally favor the assessment of specialized agents over general ones. To complement this evaluation paradigm, we introduce Omni AgenticBench, which provides a unified context and toolset for assessing general agents across diverse task categories within a single, coherent setting. Using Omni AgenticBench, we systematically study test-time scaling behaviors of general agents and show that, regardless of additional computation, current models struggle to iteratively refine and improve their responses. We further identify a substantial verification gap: although general agents can often sample correct solutions, they fail to reliably recognize them, preventing theoretical gains from test-time scaling from translating into effective performance improvements. Finally, we analyze the dominant failure modes that emerge when models are evaluated in the general-agent setting. All tasks, code, and data are publicly available.
+% By evaluating frontier models through systematic test-time scaling, we demonstrate that current agents struggle to iteratively refine responses, regardless of computational budget. We further identify a substantial gap between the solution space agents can generate and their self-cognition space, thereby hindering their practical utility. Additionally, we analyze failed behaviors from the perspective of attention mechanisms, including a comparison between recently adopted sparse and linear attention. All tasks, code, and data are publicly available.
+
+\end{abstract}
+
+
+% Agentic tasks—such as codebase debugging and web information retrieval—naturally involve long contexts and represent a key bottleneck in evaluating and deploying LLM capabilities in real-world settings. While prior work has shown that test-time scaling can be effective for them, increasing inference-compute also causes interaction histories to grow: multiple rounds of model generation and environmental feedback become interleaved, forming complex, evolving contexts that are not adequately captured by existing synthetic, text-only long-context benchmarks. To address this gap, we introduce Agentic LongBench, evaluating frontier LLMs on diverse agentic tasks with long and easily extensible context. Additionally, we study two primary test-time scaling paradigms on our benchmark—parallel scaling and sequential scaling—to characterize model scaling behavior. By extending context lengths up to 256K tokens and sampling up to eight trajectories, we find that allocating compute to self-refinement yields limited performance gains, whereas increasing the number of samples leads to substantial improvements. Additionally, we provide two further analyses—attention analysis and agent design analysis—to demonstrate how our benchmark can be used to study design factors that influence models’ agentic capabilities.
+
+% \input{src/1intro}
+% \input{src/1_intro_seperate}
+\input{src/1_intro_last_day!}
+
+
+\input{src/2benchmark}
+
+\input{src/3mainresults}
+
+\input{src/4tts_analysis}
+
+% \input{src/5_analysis_main}
+\input{src/5_attention_analysis_only}
+
+\input{src/related_work}
+
+\input{src/6conclusions}
+
+
+% \section*{Software and Data}
+
+% If a paper is accepted, we strongly encourage the publication of software and
+% data with the camera-ready version of the paper whenever appropriate. This can
+% be done by including a URL in the camera-ready copy. However, \textbf{do not}
+% include URLs that reveal your institution or identity in your submission for
+% review. Instead, provide an anonymous URL or upload the material as
+% ``Supplementary Material'' into the OpenReview reviewing system. Note that
+% reviewers are not required to look at this material when writing their review.
+
+% Acknowledgements should only appear in the accepted version.
+% \section*{Acknowledgements}
+
+% \textbf{Do not} include acknowledgements in the initial version of the paper
+% submitted for blind review.
+
+% If a paper is accepted, the final camera-ready version can (and usually should)
+% include acknowledgements.  Such acknowledgements should be placed at the end of
+% the section, in an unnumbered section that does not count towards the paper
+% page limit. Typically, this will include thanks to reviewers who gave useful
+% comments, to colleagues who contributed to the ideas, and to funding agencies
+% and corporate sponsors that provided financial support.
+
+\section*{Impact Statement}
+
+This paper introduces General AgentBench, a benchmark for evaluating large language model agents as general-purpose systems under unified and realistic interaction settings. By exposing agents to diverse tasks and tools within a single framework, it enables more consistent and transparent assessment of agents’ abilities to interpret open-ended requests, select appropriate tools, and scale inference-time computation across domains. We expect this benchmark to support the development and diagnosis of more robust general-purpose agents. We also acknowledge potential risks. Unified evaluation and test-time scaling may favor computationally intensive or proprietary models, and unreliable self-choice under parallel scaling may lead to unstable or misleading agent behavior if applied naively in deployment. As general-purpose agents are increasingly integrated into real-world applications, failures in long-horizon reasoning, tool use, or self-verification may affect reliability and user trust. We emphasize that General AgentBench is intended for research and evaluation purposes. The community shares a responsibility to interpret results carefully and to pair scaling-based improvements with stronger verification, transparency, and safety considerations.
+    
+\bibliography{icml_references}
+\bibliographystyle{icml2026}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% APPENDIX
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\appendix
+\onecolumn
+% \section{You \emph{can} have an appendix here.}
+
+% You can have as much text here as you want. The main body must be at most $8$
+% pages long. For the final version, one more page can be added. If you want, you
+% can use an appendix like this one.
+
+% The $\mathtt{\backslash onecolumn}$ command above can be kept in place if you
+% prefer a one-column appendix, or can be removed if you prefer a two-column
+% appendix.  Apart from this possible change, the style (font size, spacing,
+% margins, page numbering, etc.) should be kept the same as the main body.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\input{src/7appendix}
+
+\end{document}
+
+% This document was modified from the file originally made available by
+% Pat Langley and Andrea Danyluk for ICML-2K. This version was created
+% by Iain Murray in 2018, and modified by Alexandre Bouchard in
+% 2019 and 2021 and by Csaba Szepesvari, Gang Niu and Sivan Sabato in 2022.
+% Modified again in 2023 and 2024 by Sivan Sabato and Jonathan Scarlett.
+% Previous contributors include Dan Roy, Lise Getoor and Tobias
+% Scheffer, which was slightly modified from the 2010 version by
+% Thorsten Joachims & Johannes Fuernkranz, slightly modified from the
+% 2009 version by Kiri Wagstaff and Sam Roweis's 2008 version, which is
+% slightly modified from Prasad Tadepalli's 2007 version which is a
+% lightly changed version of the previous year's version by Andrew
+% Moore, which was in turn edited from those of Kristian Kersting and
+% Codrina Lauth. Alex Smola contributed to the algorithmic style files.

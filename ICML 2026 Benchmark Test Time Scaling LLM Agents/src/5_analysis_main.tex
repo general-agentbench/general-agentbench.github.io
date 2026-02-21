@@ -1,0 +1,34 @@
+\section{Attention Analysis}\label{section5}
+
+\subsection{Comparison between Linear and Full Attention}
+
+Across both parallel and sequential test-time scaling, Qwen3-Next shows weaker performance gains than full-attention models. To investigate this gap, we analyze the impact of its hybrid attention design. We compare it with Qwen3-235B-A22B, a full-attention baseline, by measuring average attention distance in the final reasoning step. Specifically, for every full-attention head, we record the top-$k$ attended tokens and compute their token-distance relative to the beginning of the final output span. For Gated DeltaNet, which does not explicitly expose standard attention weights, we adopt a mathematically equivalent procedure to recover the effective top-$k$ contributing tokens and compute the corresponding distances (details provided in Appendix~X).
+
+Figure~\ref{fig:attention_analysis} visualizes the resulting heatmaps. We find that full attention consistently exhibits larger average attention distances than Gated DeltaNet. This is evident both in the comparison between Qwen3-235B and Qwen3-Next, as well as within Qwen3-Next itself when contrasting its Gated Attention and DeltaNet components. These results indicate that full attention is more effective at capturing long-range dependencies, which likely contributes to its superior scaling consistency under long-context agentic settings
+
+
+% \cx{all sec 5 are interesting, but too verbose, can be much more concise and reduce the space into half? I really want to inherit reasoning token budget study as it illustates a new and clear picture of what seq scaling does not beyond certain token lens. then if we have space we can move some case studies to main paper}\xiaochuan{check. Shortened the three subsections.}
+
+\begin{figure}[t]
+    \centering
+
+    \begin{subfigure}[t]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figs/attention_mean_distance_qwen3_235b.pdf}
+        \caption{Qwen3-235B (full attention)}
+        \label{fig:attn_qwen3_235b}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figs/attention_mean_distance_qwen3_next.pdf}
+        \caption{Qwen3-Next (hybrid attention)}
+        \label{fig:attn_qwen3_next}
+    \end{subfigure}
+
+    \caption{\textbf{Mean top-$k$ attention distance across layers and heads.}
+    We report the average distance between the top-$k$ attended tokens and the beginning of the model’s final output span.
+    \textbf{Left}: Qwen3-235B with full attention.
+    \textbf{Right}: Qwen3-Next with hybrid Gated Attention and Gated DeltaNet.}
+    \label{fig:attention_analysis}
+\end{figure}

@@ -1,0 +1,88 @@
+
+
+\section{Test-Time Scaling Evaluation}
+
+% In this section, we present a systematic study of test-time scaling behavior under the omni agentic setting. Our goal is to characterize how general-agent performance evolves with increased test-time computation, and to examine whether performance gains from test-time scaling translate into improvements in real-world agentic interactions.
+
+In this section, we present a systematic study of test-time scaling behavior of general LLM agents. Section~\ref{4.1} introduces the scaling strategies, with results and findings presented in Sections~\ref{4.2} and~\ref{4.3}.
+
+
+\subsection{Scaling Methodology}\label{4.1}
+
+We investigate test-time scaling through two complementary paradigms: \textbf{Parallel Scaling} and \textbf{Sequential Scaling}, which correspond to distinct axes of computational allocation—breadth of exploration versus depth of exploitation. Compared with more sophisticated test-time scaling techniques such as self-correction\cite{Madaan2023SelfRefine}, beam search\cite{Yao2023ToT}, or MCTS\cite{Zhou2023LATS}, these two strategies are the most commonly adopted and easiest to deploy in real-world agentic systems.
+
+\paragraph{Parallel Scaling.}
+In the parallel scaling regime, we independently sample $K$ trajectories for each query. Increasing $K$ expands the reachable action space, thereby increasing the likelihood that the agent explores at least one trajectory containing a correct solution, relative to the single-shot baseline ($K=1$). 
+
+However, in the absence of external oracles or human feedback—particularly in real-world deployments—parallel scaling alone is insufficient: agents must also be capable of evaluating and selecting the best outcome from their own generated trajectories. To assess this ability, we introduce this \textbf{Self-Choice} setting, in which the agent evaluates its parallelly sampled outputs using one of the following strategies:
+
+\textbf{(1) Point-wise choice.}  
+The agent independently evaluates each sampled trajectory and assigns a binary judgment. Performance is measured by the alignment between the model’s judgments and oracle labels, averaged over trajectories that are correct under oracle evaluation.
+
+\textbf{(2) Pair-wise choice.}  
+The agent compares two sampled trajectories at a time and iteratively promotes the superior one through a bubble-sort-style selection process. After $K-1$ pairwise comparisons, a single trajectory is selected as the final output, and performance is evaluated based on the correctness of this selected trajectory.
+
+Overall, self-choice reflects the practical effectiveness of parallel scaling, while past@$K$ serves as an upper bound that reveals the solution potential.
+
+\paragraph{Sequential Scaling.}
+In contrast, sequential scaling increases computational depth by extending the interaction horizon. As the agent engages with the environment, the conversation context progressively grows. When the agent attempts to terminate an episode (e.g., by emitting an End-of-Turn token), we inject an additional round of environment feedback to encourage further reflection on prior reasoning and exploration of alternative solution paths.
+
+To quantify scaling behaviors under both paradigms, we plot task accuracy against the number of independent samples ($K$) for parallel scaling, and against cumulative context length for sequential scaling in Figure~\ref{fig:tts}. Due to the cost of API-based inference, each model is sampled at most four times, and context length is scaled up to 196K tokens. A detailed cost analysis for reproducibility is provided in the Appendix~\ref{appendix:cost}.
+
+\subsection{Sequential Scaling}\label{4.2}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.98\linewidth]{figs/search_heatmap_159_168.pdf}
+\caption{\textbf{Instance-level correctness dynamics under sequential scaling.}
+We randomly sample 10 instances from the reasoning domain and track their correctness across increasing context lengths. Red indicates incorrect predictions and blue indicates correct ones. Most instances exhibit stagnant or oscillatory behavior, repeating prior successes while failing on unresolved cases, with some fluctuating between correct and incorrect across steps.}
+    \label{fig:per_instance}
+\end{figure}
+
+Sequential scaling exhibits behavior that departs markedly from our expectations, shown in the bottom of Figure~\ref{fig:tts}. Although several models on certain benchmarks show performance improvements, such as Qwen3-235B on the Search domain and Deepseek-v3.2 on the Reason domain, most show little to no consistent improvement despite allocating additional computational resources through iterative reasoning and reflection. 
+
+We categorize sequential scaling behaviors into two distinct regimes. (1) \textbf{Stagnant fluctuation}: In domains such as reasoning, performance oscillates within a narrow range despite increased computation. This pattern suggests a limited capacity for agents to explore novel solution paths within extended interaction traces, coupled with a diminished ability to maintain coherence—likely due to the agent's finite context processing capacity. (2) \textbf{Saturation and degradation}: In coding domains, models initially benefit from additional reasoning steps; however, beyond an important turning point, performance consistently deteriorates and fails to recover. Figure~\ref{fig:per_instance} shows how instance-level correctness for several data entries changes as the context length increases. We observe that agents either repeatedly succeed on queries they already handle well while failing to progress on unsuccessful cases, or exhibit unstable behavior with accuracy fluctuating between 0 and 1 across interaction steps. These observations further validate our summarization regarding the inherent limitations of sequential scaling.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.98\linewidth]{figs/context_scaling_regions.pdf}
+    \caption{Sequential scaling behavior of Gemini~2.5-Flash and Qwen3-235B across domains, with inherent context lengths indicated by the dashed line. Performance scales positively as interaction history approaches and slightly exceeds the inherent context; however, it saturates or degrades once the context extends significantly beyond this threshold. This limit represents the ``context ceiling" of sequential scaling, beyond which further history yields diminishing returns.}
+    \label{fig:inherent_context}
+\end{figure}
+
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.98\linewidth]{figs/agentic_scaling_pairwise_facet.pdf}
+    \caption{\textbf{Verification gap between generation and self-choice.}
+Across four domains, we observe a consistent gap between solution generation and verification: as the number of samples increases, correct solutions appear more frequently in the sampled set, yet models often fail to identify and select them. The dashed and dotted curves represent two self-choice strategies, while the diamond denotes a stronger evaluator, GPT-5.}
+    \label{fig:self-choice}
+\end{figure*}
+
+To better understand how this turning point occurs, we analyze performance relative to an agent’s inherent context length—defined as the total context naturally accumulated when completing a task without artificial constraints on interaction depth. By integrating data from Qwen3-235B and Gemini 2.5-Flash (as seen in Figure~\ref{fig:tts}) with new experimental results on smaller context windows, we observed a distinct performance ceiling. As shown in Figure~\ref{fig:inherent_context}, both models exhibit an initial upward trend, approaching peak performance as they reach their inherent context limits. However, once the accumulated context passes a specific threshold ( for example, approximately 112K for Qwen3-235B and 96K for Gemini 2.5-Flash in the search domain), performance typically plateaus or begins to degrade. In these instances, additional computation and time yield no further gains. This suggests the existence of a ``\textbf{context ceiling}": a maximum effective context length under sequential scaling, beyond which raw interaction history offers diminishing or zero practical returns. Notably, this ceiling varies across domains, reflecting the unique demands each task places on context utilization and computational efficiency.
+
+Taken together, these results indicate that simply allocating more computation by extending raw interaction histories rarely leads to meaningful performance gains, contradicting previous observations in non-agentic settings \cite{muennighoff2025s1}. Long-horizon agentic tasks expose fundamental challenges in context utilization and reasoning stability, highlighting the need for more effective mechanisms for context management and reasoning control under sequential scaling \cite{zhang2025agentic, claudecontexxt}.
+
+\subsection{Parallel Scaling}\label{4.3}
+
+We observe a monotonic increase in \textbf{pass@K} as the number of sampled trajectories grows (Figure~\ref{fig:tts}, top). Increasing $K$ from 1 to 4 yields an average improvement of roughly 50\%, with DeepSeek-V3.2 exhibiting the largest gains—approaching a twofold improvement in both coding and reasoning domains.
+
+However, pass@K only reflects an idealized upper bound. In practice, the effectiveness of parallel scaling depends on an agent’s ability to evaluate and select among its own sampled trajectories, which is captured by self-choice performance. As shown by the gap between the solid lines (pass@K) and the dashed or dotted lines (self-choice) in Figure~\ref{fig:self-choice}, self-choice performance consistently lags behind the pass@K upper bound regardless of the strategy. In some cases, self-choice performance even degrades as $K$ increases. While the coding domain exhibits the smallest gap between pass@K and self-choice, in most settings self-choice gains saturate quickly and fail to track the continued improvement of pass@K.
+
+To examine whether this gap stems from limited verifier capability, we replace the model’s internal self-judgment with an external verifier, GPT-5, and perform point-wise evaluation of sampled trajectories from all models. As shown by the diamond line in Figure~\ref{fig:self-choice}, GPT-5 generally underperforms models’ own self-judgment. Notably, even at $K=1$, GPT-5 occasionally misclassifies correct trajectories as incorrect, introducing a non-trivial gap between pass@1 and GPT-5–based verification. We hypothesize that this effect arises from \textbf{solution familiarity}: models are better at evaluating their own generations, which align closely with their internal reasoning patterns, whereas external verifiers may struggle to accurately assess unfamiliar execution traces.
+
+Overall, these results reveal a fundamental gap between models’ generation capacity and their ability to reliably select correct solutions, which ultimately limits the practical utility of parallel scaling. 
+
+% Bridging this gap requires improving agents’ self-evaluation robustness and reliability, rather than solely expanding the generation space.
+
+
+
+
+% \cx{I think it is clear that now we should treat the pairwise choice as the parallel scaling, as it is the actual scaling method, then the pass at K is the upper bound to show the verification gap... hopefully we have all the results to change the plots, and the writing changes can be done in the next pass. Right now the oracle pass at K upper bound is mixed with the actual sequence scaling, making it quite confusing}\xiaochuan{check}
+
+% \cx{then you can move the pairwise self choice descriptions as part of the previou subsection as scaling methods (and it is realy a scaling method now)}\xiaochuan{check}
+
+
+
+% \cx{will be great if we can show the inherit reasoning context length of at least one model's distributions on all the testing user requests, to show this important message, likely here in this paper...}\xiaochuan{check}
+

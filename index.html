@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Benchmark Test-Time Scaling of General LLM Agents. A unified benchmark for evaluating general-purpose LLM agents across search, coding, reasoning, and tool-use domains.">
+  <meta name="keywords" content="Agent, LLM, Test-Time Scaling, Benchmark, Agent Evaluation">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Benchmark Test-Time Scaling of General LLM Agents</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+</head>
+<body>
+
+<!-- Floating Table of Contents -->
+<div class="toc-wrapper" id="floating-toc">
+  <h4 style="margin-bottom: 10px;"><a href="#">Table of Contents</a></h4>
+  <ul class="toc-list">
+    <li><a href="#section-introduction" class="toc-link" data-section="section-introduction">Introduction</a></li>
+    <li><a href="#section-benchmark" class="toc-link" data-section="section-benchmark">General AgentBench</a></li>
+    <li><a href="#section-scaling" class="toc-link" data-section="section-scaling">Scaling Behaviors</a></li>
+    <li><a href="#section-sequential" class="toc-link" data-section="section-sequential" style="padding-left: 0.8rem;">Sequential Scaling</a></li>
+    <li><a href="#section-parallel" class="toc-link" data-section="section-parallel" style="padding-left: 0.8rem;">Parallel Scaling</a></li>
+    <li><a href="#BibTeX" class="toc-link" data-section="BibTeX">BibTeX</a></li>
+    <li><a href="#section-contact" class="toc-link" data-section="section-contact">Contact</a></li>
+  </ul>
+</div>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title" style="white-space: nowrap;">Benchmark Test-Time Scaling of General LLM Agents</h1>
+          <div class="is-size-4 publication-authors" style="margin-bottom: 0.25rem;">
+            <span class="author-block">
+              <a href="https://xiaochuanli.com/">Xiaochuan Li</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="https://github.com/Nozom1466">Ryan Ming</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="https://www.linkedin.com/in/pranavsetlur/">Pranav Setlur</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="https://www.linkedin.com/in/abhijay-paladugu/">Abhijay Paladugu</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="https://www.linkedin.com/in/andy-tang-aa37b7237/">Andy Tang</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="https://www.linkedin.com/in/haok1402/">Hao Kang</a><sup>1</sup>,</span>
+          </div>
+          <div class="is-size-4 publication-authors" style="margin-bottom: 0.5rem;">
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=Rw4NiLAAAAAJ&hl=en">Shuai Shao</a><sup>2</sup>,</span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?hl=zh-CN&user=CS5uNscAAAAJ&view_op=list_works&sortby=pubdate">Rong Jin</a><sup>2</sup>,</span>
+            <span class="author-block">
+              <a href="https://www.cs.cmu.edu/~cx/">Chenyan Xiong</a><sup>1</sup></span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>Language Technologies Institute, Carnegie Mellon University</span>
+            &nbsp;&nbsp;
+            <span class="author-block"><sup>2</sup>Meta</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/placeholder"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/placeholder"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="https://github.com/cxcscmu/General-AgentBench"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                </a>
+              </span>
+              <!-- Twitter Link. -->
+              <span class="link-block">
+                <a href="#"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-x-twitter"></i>
+                  </span>
+                  <span>Twitter</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Teaser: Two intro figures -->
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <h3 class="title is-3 has-text-centered highlight-blob">❓ Is Test-Time Scaling as Effective as You Think?</h3>
+
+      <div class="intro-figures">
+        <div class="intro-fig-item">
+          <img src="./static/images/intro_figure_b_scaling.png"
+               alt="Sequential scaling showing performance degradation with longer interaction histories">
+          <p>(a) Sequential test-time scaling.</p>
+        </div>
+        <div class="intro-fig-item">
+          <img src="./static/images/intro_figure_c_gap.png"
+               alt="Parallel scaling showing verification gap between generation and self-choice">
+          <p>(b) Parallel test-time scaling.</p>
+        </div>
+      </div>
+      <div class="teaser-text">
+        <p>Our systematic test-time scaling analysis reveals two fundamental limits:</p>
+        <ol>
+          <li><b class="highlight-blob">Sequential scaling</b> is bounded by a <b class="highlight-blob">context ceiling</b>, beyond which longer interactions become unstable.</li>
+          <li><b class="highlight-blob">Parallel scaling</b> delivers limited practical gains due to a persistent <b class="highlight-blob">verification gap</b> between generation and self-choice.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Introduction -->
+<section class="section" id="section-introduction">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column">
+        <h2 class="title is-3">🔍 Introduction</h2>
+        <div class="content has-text-justified teaser-text">
+          <p>
+            LLM agents are increasingly expected to function as general-purpose systems capable of resolving open-ended user requests. While existing benchmarks focus on domain-aware environments for developing specialized agents, evaluating general-purpose agents requires more realistic settings that challenge them to operate across multiple skills and tools within a unified environment. We introduce <b class="highlight-blob">General AgentBench</b>, a benchmark that provides such a unified framework for evaluating general LLM agents across search, coding, reasoning, and tool-use domains.
+          </p>
+          <p>
+            Using General AgentBench, we systematically study test-time scaling behaviors under <b class="highlight-blob">sequential scaling</b> (iterative interaction) and <b class="highlight-blob">parallel scaling</b> (sampling multiple trajectories). Evaluation of ten leading LLM agents reveals a substantial performance degradation when moving from domain-specific evaluations to this general-agent setting. Moreover, we find that <b class="highlight-blob">neither scaling methodology yields effective performance improvements in practice</b>, due to two fundamental limitations: <i>context ceiling</i> in sequential scaling and <i>verification gap</i> in parallel scaling.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- General AgentBench + Performance (merged) -->
+<section class="section" id="section-benchmark">
+  <!-- style="background: #edece9;" -->
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">📏 General AgentBench</h2>
+
+    <div class="content has-text-justified" style="max-width: 800px; margin: 0 auto 1.5rem;">
+      <p class="teaser-text">
+        We introduce General AgentBench, a benchmark for evaluating whether agents can compose multiple skills and tools to solve open-ended requests from diverse domains under a unified framework, more closely reflecting real-world user interactions.
+      </p>
+      <p class="teaser-text">
+        General AgentBench covers four task domains, including Search, Coding, Reason, and Tool use. All tools are consolidated through the Model Context Protocol (MCP) into a unified interface, where agents see only a single shared tool pool across all tasks.
+      </p>
+      <p class="teaser-text">
+        Most models experience substantial degradation (<b class="highlight-blob">10&ndash;30% on average</b>) when moving from domain-specific to the general-agent setting.
+      </p>
+    </div>
+
+    <div class="fig-carousel fig-carousel-wide" id="benchmarkCarousel">
+      <div class="fig-carousel-track">
+        <div class="fig-carousel-slide active">
+          <div class="benchmark-figure">
+            <img src="./static/images/omni_agenticbench_main.png"
+                 alt="Main results across general agent benchmark domains">
+            <p class="figure-caption">Relative performance change across domains from the Baseline (B) specialized agent setting to the general agent (G) setting with unified context and tools. Negative values indicate performance degradation under the General AgentBench.</p>
+          </div>
+        </div>
+        <div class="fig-carousel-slide">
+          <div class="benchmark-figure">
+            <img src="./static/images/omni_agenticbench_summary.png"
+                 alt="Performance summary across general agent benchmark domains">
+            <p class="figure-caption">Performance comparison between specialized-agent and general-agent settings across models.</p>
+          </div>
+        </div>
+      </div>
+      <button class="fig-carousel-btn prev" aria-label="Previous slide">&#10094;</button>
+      <button class="fig-carousel-btn next" aria-label="Next slide">&#10095;</button>
+      <div class="fig-carousel-dots">
+        <span class="fig-carousel-dot active" data-index="0"></span>
+        <span class="fig-carousel-dot" data-index="1"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Two Scaling Behaviors -->
+<section class="section" id="section-scaling">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Two Test-Time Scaling Behaviors</h2>
+    <div class="content has-text-justified" style="max-width: 800px; margin: 0 auto 1.5rem;">
+      <p class="teaser-text">
+        We systematically study two primary test-time scaling paradigms for general LLM agents:
+      </p>
+      <ul class="teaser-text" style="margin-top: 0.3rem;">
+        <li><b class="highlight-blob">Parallel scaling</b> expands the solution space by independently sampling <i>K</i> trajectories for each query.</li>
+        <li><b class="highlight-blob">Sequential scaling</b> increases computational depth by extending the interaction horizon.</li>
+      </ul>
+      <p class="teaser-text">
+        We further introduce a <b class="highlight-blob">self-choice</b> setting to measure the gap between the parallel upper bound (pass@<i>K</i>) and real-world effectiveness: agents must also be capable of evaluating and selecting the best outcome from their own generated trajectories.
+      </p>
+    </div>
+
+    <!-- Main scaling figure -->
+    <div class="columns is-centered has-text-centered" style="margin-bottom: 2.5rem;">
+      <div class="column">
+        <img src="./static/images/agentic_scaling_2x4.png"
+             alt="Test-time scaling behaviors across five models and four domains"
+             style="width: 100%; border-radius: 10px;">
+        <p class="figure-caption">Test-time scaling behaviors of general LLM agents. <b>Top</b>: Parallel scaling expands the solution space through increased sampling. <b>Bottom</b>: Sequential scaling allocates additional computation via longer interaction histories, yet exhibits unstable or diminishing returns.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Sequential Scaling: Context Ceiling -->
+<section class="section" id="section-sequential" style="padding-top: 1.5rem;">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Sequential Scaling &mdash; Context Ceiling</h2>
+    <div class="content has-text-justified" style="max-width: 800px; margin: 0 auto 1.5rem;">
+      <p>
+        Sequential scaling extends the interaction horizon by injecting additional rounds of feedback. While performance initially improves as agents approach their inherent context length, it <b class="highlight-blob">plateaus or degrades</b> once context exceeds a critical threshold.
+      </p>
+      <p>
+        This <b class="highlight-blob">context ceiling</b> varies by model and domain&mdash;for example, approximately 112K tokens for Qwen3-235B and 96K for Gemini 2.5-Flash in the search domain. Beyond it, accumulated history overwhelms the agent's reasoning capacity, leading to instability in long-horizon tasks.
+      </p>
+    </div>
+    <div class="columns is-centered has-text-centered">
+      <div class="column">
+        <img src="./static/images/context_scaling_regions.png"
+             alt="Context ceiling in sequential scaling"
+             style="width: 100%; max-width: 700px; border-radius: 10px;">
+        <p class="figure-caption">Sequential scaling behavior of Gemini 2.5-Flash and Qwen3-235B across domains.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Parallel Scaling: Verification Gap -->
+<section class="section" id="section-parallel" style="padding-top: 1.5rem;">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Parallel Scaling &mdash; Verification Gap</h2>
+    <div class="content has-text-justified" style="max-width: 800px; margin: 0 auto 1.5rem;">
+      <p>
+        Parallel scaling samples multiple independent trajectories, expanding the solution space. While pass@<i>K</i> increases monotonically, the <b class="highlight-blob">self-choice accuracy</b>&mdash;where agents must identify the correct solution from their own generations&mdash;consistently lags behind.
+      </p>
+      <p>
+        This <b class="highlight-blob">verification gap</b> limits practical utility: agents can generate correct answers but fail to reliably select them. Even using GPT-5 as an external verifier does not close the gap.
+      </p>
+    </div>
+    <div class="columns is-centered has-text-centered">
+      <div class="column">
+        <img src="./static/images/agentic_scaling_pairwise_facet.png"
+             alt="Verification gap between generation and self-choice"
+             style="width: 100%; max-width: 700px; border-radius: 10px;">
+        <p class="figure-caption">Verification gap between generation and self-choice. The dashed and dotted curves represent two self-choice strategies, while the diamond denotes a stronger evaluator, GPT-5.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- BibTeX -->
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>Coming soon.</code></pre>
+  </div>
+</section>
+
+
+<!-- Contact -->
+<section class="section" id="section-contact" style="padding-top: 2rem; padding-bottom: 2rem;">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Contact</h2>
+        <p>For any questions or feedback, please reach out to <a href="mailto:xiaochu4@andrew.cmu.edu">xiaochu4 [at] andrew.cmu.edu</a>.</p>
+        <div class="contact-logos" style="margin-top: 1.5rem; display: flex; justify-content: center; align-items: center; gap: 3rem;">
+          <a href="https://www.lti.cs.cmu.edu/" target="_blank">
+            <img src="./static/images/lti_logo.png" alt="Language Technologies Institute, CMU" style="height: 50px;">
+          </a>
+          <a href="https://about.meta.com/" target="_blank">
+            <img src="./static/images/meta_logo.svg" alt="Meta" style="height: 36px;">
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link" href="https://github.com/cxcscmu/General-AgentBench">
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is based on the <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> project page, licensed under a
+            <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Open both by default
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('module-sequential').classList.add('is-open');
+  document.getElementById('module-parallel').classList.add('is-open');
+
+  // Floating TOC: highlight active section on scroll
+  const tocLinks = document.querySelectorAll('.toc-link[data-section]');
+  const sections = [];
+  tocLinks.forEach(function(link) {
+    var id = link.getAttribute('data-section');
+    var el = document.getElementById(id);
+    if (el) sections.push({ id: id, el: el, link: link });
+  });
+
+  function updateActiveToc() {
+    var scrollY = window.scrollY + 120;
+    var active = null;
+    for (var i = sections.length - 1; i >= 0; i--) {
+      if (sections[i].el.offsetTop <= scrollY) {
+        active = sections[i];
+        break;
+      }
+    }
+    tocLinks.forEach(function(l) { l.classList.remove('is-active'); });
+    if (active) active.link.classList.add('is-active');
+  }
+
+  window.addEventListener('scroll', updateActiveToc);
+  updateActiveToc();
+
+  // Smooth scroll for TOC links
+  tocLinks.forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      var target = document.getElementById(this.getAttribute('data-section'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Figure carousels
+  document.querySelectorAll('.fig-carousel').forEach(function(carousel) {
+    var slides = carousel.querySelectorAll('.fig-carousel-slide');
+    var dots = carousel.querySelectorAll('.fig-carousel-dot');
+    var current = 0;
+
+    function goTo(idx) {
+      slides[current].classList.remove('active');
+      dots[current].classList.remove('active');
+      current = (idx + slides.length) % slides.length;
+      slides[current].classList.add('active');
+      dots[current].classList.add('active');
+    }
+
+    carousel.querySelector('.fig-carousel-btn.prev').addEventListener('click', function() {
+      goTo(current - 1);
+    });
+    carousel.querySelector('.fig-carousel-btn.next').addEventListener('click', function() {
+      goTo(current + 1);
+    });
+    dots.forEach(function(dot) {
+      dot.addEventListener('click', function() {
+        goTo(parseInt(this.getAttribute('data-index'), 10));
+      });
+    });
+  });
+});
+</script>
+
+</body>
+</html>

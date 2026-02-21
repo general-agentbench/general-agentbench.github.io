@@ -1,0 +1,34 @@
+\begin{table*}[ht]
+\centering
+\small
+\caption{Taxonomy of Existing Long-Context Benchmarks. Unlike static evaluation paradigms, Agentic LongBench introduces multi-turn dynamics and sequential reasoning over expansive contexts.}
+\label{tab:taxonomy}
+\begin{tabularx}{\textwidth}{l l X}
+\toprule
+\textbf{Task Category} & \textbf{Sub-category} & \textbf{Representative Benchmarks / Papers} \\ 
+\midrule
+\textbf{Long Document QA} & Single/Multi-Doc Understanding & NarrativeQA \cite{kovcisky2018narrativeqa}, 2WikiMultihopQA \cite{ho-etal-2020-constructing}, Loong \cite{wang2024leave} \\
+\cmidrule{2-3}
+& Long Dialogue Understanding & MeetingBank \cite{hu2023meetingbank}, CharacterChat \cite{tu2023characterchat} \\
+\cmidrule{2-3}
+& Code Understanding & RepoBench \cite{liu2023repobench}, CrossCodeEval \cite{ding2023crosscodeeval} \\
+\cmidrule{2-3}
+& Structured Data Understanding & TabFact \cite{chen2019tabfact}, WikiTableQuestions \cite{kweon2023open}, LongBench \cite{bai2024longbench} (L-Data)\\
+\midrule
+\textbf{Summarization} & Global Information Aggregation & GovReport \cite{huang2021efficient}, Multi-News \cite{fabbri2019multi}, ZeroSCROLLS \cite{shaham2023zeroscrolls} \\
+\midrule
+\textbf{Many-Shot} & In-Context Learning & MIR-Bench \cite{yan2025mir}, Many-Shot ICL \cite{agarwal2024many} \\
+\midrule
+\textbf{Retrieval} & Key-Value Retrieval & Needle In A Haystack \cite{kamradt_needlehaystack_2023}, RULER \cite{hsieh2024ruler}, MRCR \cite{openai_mrcr_2025}, BABILong \citeyear{kuratov2024babilong} \\
+\cmidrule{2-3}
+& Retrieval-Augmented Gen (RAG) & RAGBench \cite{friel2024ragbench}, RGB \cite{chen2024benchmarking}, RECALL \cite{liu2023recall} \\
+\midrule
+\textbf{Reranking} & Passage Reranking & BEIR \cite{thakur2021beir}, MTEB \cite{muennighoff2023mteb} (Reranking Selection) \\
+\midrule
+\textbf{Citation Gen} & Generation with Citations & ALCE \cite{gao2023enabling} (ASQA/ELI5), LongCite \cite{zhang2025longcite} \\
+\midrule
+\rowcolor[gray]{0.9} \textbf{Agentic } & \textbf{Multi-turn Reasoning} & SWE-Bench \cite{jimenez2023swebench}, BrowseComp \cite{wei2025browsecomp}, OSWorld \cite{xie2024osworld}, \textbf{General AgentBench (This Work)} \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+

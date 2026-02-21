@@ -1,0 +1,41 @@
+\begin{table*}[t]
+\centering
+\small
+\scalebox{0.9}{
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{l *{2}{c c c c c}}
+\toprule
+\multirow{2}{*}{\textbf{Omni (Model)}} 
+& \multicolumn{5}{c}{\textbf{Search}} 
+& \multicolumn{5}{c}{\textbf{Code}} \\
+\cmidrule(lr){2-6}\cmidrule(lr){7-11}
+& \textbf{64k} & \textbf{80k} & \textbf{96k} & \textbf{112k} & \textbf{128k}
+& \textbf{64k} & \textbf{80k} & \textbf{96k} & \textbf{112k} & \textbf{128k} \\
+\midrule
+Qwen3-Next        & -- & -- & -- & -- & --  & -- & -- & -- & -- & -- \\
+Qwen3-235B        & -- & -- & -- & -- & --  & -- & -- & -- & -- & -- \\
+DeepSeek-V3.2     & -- & -- & -- & -- & --  & -- & -- & -- & -- & -- \\
+DeepSeek-R1-0528  & -- & -- & -- & -- & --  & -- & -- & -- & -- & -- \\
+Gemini-2.5 Flash  & -- & -- & -- & -- & --  & -- & -- & -- & -- & -- \\
+\midrule
+\addlinespace[4pt]
+
+\multirow{2}{*}{\textbf{Omni (Model)}} 
+& \multicolumn{5}{c}{\textbf{Reason}} 
+& \multicolumn{5}{c}{\textbf{Tool-use}} \\
+\cmidrule(lr){2-6}\cmidrule(lr){7-11}
+& \textbf{64k} & \textbf{80k} & \textbf{96k} & \textbf{112k} & \textbf{128k}
+& \textbf{64k} & \textbf{80k} & \textbf{96k} & \textbf{112k} & \textbf{128k} \\
+\midrule
+Qwen3-Next        & -- & -- & -- & -- & --  & 0.62 & 0.54 & 0.41 & 0.40 & 0.40 \\
+Qwen3-235B        & -- & -- & -- & -- & --  & -- & -- & -- & -- & -- \\
+DeepSeek-V3.2     & -- & -- & -- & -- & --  & -- & -- & -- & -- & -- \\
+DeepSeek-R1-0528  & -- & -- & -- & -- & --  & -- & -- & -- & -- & -- \\
+Gemini-2.5 Flash  & -- & -- & -- & -- & --  & 0.66 & 0.50 & 0.48 & 0.47 & 0.45 \\
+\bottomrule
+\end{tabular}
+}
+\caption{Sequential scaling results across domains under the Omni-agent setting, evaluated at increasing context budgets (64k--128k). \cx{no need}}
+% \caption{Sequential scaling results across domains under the Omni-agent setting, evaluated at increasing context budgets (64k--128k).}
+\label{tab:omni_sequential_scaling}
+\end{table*}

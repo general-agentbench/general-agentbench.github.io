@@ -1,0 +1,82 @@
+\section{Main Results}
+
+In this section, we report overall performance on General AgentBench and compare it against evaluations conducted under prior domain-specific settings to quantify the gap between specialized and general-purpose LLM agents.
+
+\subsection{Result analysis}
+
+Table~\ref{tab:omni_only_domain_avg} summarizes the results across models and domains on General AgentBench. Claude Sonnet 4.5 achieves the strongest overall performance, driven primarily by its tool-use and coding capabilities, while GPT-5 attains the highest scores in the Search and Reason domains, reflecting its strengths in information retrieval and complex reasoning. Among open-source models, DeepSeek-V3.2 outperforms both Gemini variants, demonstrating the significant scaling potential of efficient, sparse-attention architectures. Across models, performance on BrowseComp remains consistently low, indicating that retrieving rare and precise information beyond in-domain training data is still a major bottleneck for current LLM agents.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.95\linewidth]{figs/omni_agenticbench_summary.pdf}
+\caption{Performance comparison between specialized-agent and general-agent settings.\textbf{Top}: Absolute performance .\textbf{Bottom}: Relative performance degradation under the general-agent setting.}
+    \label{fig:mean_degradation}
+\end{figure}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.92\linewidth]{figs/agentic_scaling_2x4.pdf}
+    \caption{\textbf{Test-time scaling behaviors of general LLM agents.} Results are reported for five models across four domains on General AgentBench. \textbf{Top}: Parallel scaling expands the solution space through increased sampling. \textbf{Bottom}: Sequential scaling allocates additional computation via longer interaction histories, yet exhibiting unstable or diminishing returns.}
+    \label{fig:tts}
+\end{figure*}
+
+We further examine how performance changes when models transition from specialized agents operating under domain-specific contexts to general agents acting within a unified environment with shared toolsets.  Figure~\ref{fig:mean_degradation} summarizes the mean degradation aggregated over all domains, while Figure~\ref{fig:domain_degradation} reports the relative performance change for each agent across domains. Most LLM agents experience substantial degradation in the general-agent setting, with average relative drops ranging from 10\% to 30\%. The magnitude of this degradation varies widely: for example, Gemini 2.5-Pro suffers a drop exceeding 60\% in the Reason domain, falling from top-tier performance in the baseline setting to near-average performance as a general agent. In contrast, Claude Sonnet 4.5 remains notably robust, with only a 0.2\% average degradation. Detailed overall results can be found in Appendix ~\ref{appendix:agentic_benchmark_details}.
+
+\subsection{Cross-domain tool usage}\label{appendix:cross_domain_tool}
+
+Interestingly, several models, including Qwen3-Next, Deepseek-R1, and Claude, exhibit \textbf{performance gains} in the Search domains under the general-agent setting. Trajectory-level analysis shows that these improvements arise from effective \textbf{cross-domain tool usage}, where agents repurpose tools beyond their originally intended domains to support reasoning and information retrieval. 
+We take a closer look at these behaviors. Analysis of 189 search task traces from Claude Sonnet 4.5 reveals that $26$\% of tasks ($50/189$) utilized specialized domain tools beyond plain web search. The most frequently used specialized tools include Google Maps APIs ($78$ calls), Paper Search across arXiv, PubMed, and Google Scholar ($60$ calls), and Hugging Face model APIs ($36$ calls). We present a case study demonstrating how domain-specific tools outperform plain web search.
+
+\begin{tcolorbox}[
+  colback=white,
+  colframe=gray!75,
+  title=\textbf{Case Study: Retrieving the Latest HF Model},
+  fonttitle=\bfseries\small,
+  boxrule=0.6pt,
+  left=3pt, right=3pt, top=4pt, bottom=4pt,
+  sharp corners,
+  breakable
+]
+
+{\small \textbf{Task.} Identify the most recent pre-trained language model on HuggingFace suitable for text classification.}
+
+\vspace{5pt}
+\begin{tcolorbox}[colback=red!3, colframe=red!15, left=2pt, right=2pt, top=2pt, bottom=2pt, boxrule=0.4pt]
+\textbf{\scriptsize Plain Web Search Baseline (6 turns)} \\
+\fontsize{6.5pt}{8pt}\selectfont
+\texttt{T1: <search> latest Hugging Face pre-trained language\\ 
+\phantom{T1: } model text classification 2024 </search>} \\
+\texttt{T2: <search> Hugging Face text classification \\ 
+\phantom{T2: } models sorted by recent trending 2024 </search>} \\
+\texttt{T3: <search> Hugging Face newest text classification \\ 
+\phantom{T3: } models January 2025 recently released </search>} \\
+\texttt{...} \\
+\texttt{T6: <answer> tabularisai/multilingual-sentiment- \\
+\phantom{T6: } analysis (fine-tuned DistilBERT) </answer>}
+\end{tcolorbox}
+
+\vspace{3pt}
+
+\begin{tcolorbox}[colback=blue!3, colframe=blue!15, left=2pt, right=2pt, top=2pt, bottom=2pt, boxrule=0.4pt]
+\textbf{\scriptsize General Agent (3 turns)} \\
+\fontsize{6.5pt}{8pt}\selectfont
+\texttt{T1: Hugging\_Face\_\_search-models( \\
+\phantom{T1: } \{"tags": "text-classification", "limit": $15$\}) \\
+\phantom{T1: } $\rightarrow$ [\{"id": "FutureMa/Qwen3-4B-Evasion", \\
+\phantom{T1: } "download": $15$\}, \\
+\phantom{T1: } \{"id": "BAAI/bge-reranker-v2-m3", \\
+\phantom{T1: } "download": $2807076$\}, ...]} \\
+\texttt{T2: search\_\_web\_search("ModernBERT HF 2025") \\
+\phantom{T2: } $\rightarrow$ "ModernBERT... $8192$-token context, \\
+\phantom{T2: } $139$M/$395$M params, trained on $2$T tokens"} \\
+\texttt{T3: Hugging\_Face\_\_get-model-info( \\
+\phantom{T3: } \{"model\_id": "answerdotai/ModernBERT-base"\}) \\
+\phantom{T3: } $\rightarrow$ Full model card and architecture details}
+\end{tcolorbox}
+
+\end{tcolorbox}
+
+We observe that the plain search baseline iteratively refines web queries across 6 turns, ultimately finding \texttt{\small tabularisai/multilingual-sentiment-analysis} with only surface-level information (``\texttt{\small fine-tuned DistilBERT}''). In contrast, the General agent system's specialized \texttt{Hugging\_Face\_\_search-models} API directly queries the model hub with structured filters, returning download counts, tags, and model IDs. The subsequent \texttt{Hugging\_Face\_\_get-model-info} call retrieves comprehensive metadata including architecture specifications, training data scale, and official model cards---information unavailable through web search snippets. 
+
+This behavior reflects an agent’s ability to dynamically select and compose tools under minimal domain priors, capturing a more realistic upper bound on general-agent capability and highlighting the importance of evaluation settings that approximate real-world tool availability. 
+

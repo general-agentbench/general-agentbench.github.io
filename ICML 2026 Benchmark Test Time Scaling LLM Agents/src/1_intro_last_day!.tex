@@ -1,0 +1,59 @@
+\section{Introduction}
+
+\begin{figure*}[t]
+    \centering
+    \begin{subfigure}[t]{0.38\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figs/intro_figure_a_radar.pdf}
+        \caption{Performace comparsion.}
+        \label{fig:intro_a}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.3\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figs/intro_figure_b_scaling.pdf}
+        \caption{Sequential test-time scaling.}
+        \label{fig:intro_b}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.3\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figs/intro_figure_c_gap.pdf}
+        \caption{Parallel test-time scaling.}
+        \label{fig:intro_c}
+    \end{subfigure}
+
+    \caption{\textbf{Evaluating general LLM agents under a realistic user-interaction scenario.}
+    \textbf{A}: GPT-5's performance drop under General AgentBench compared to static, domain-specified evaluation.
+    \textbf{B}: Sequential test-time scaling via longer interaction histories can lead to unstable or degraded performance.
+    \textbf{C}: While correct solutions increasingly appear in the generation space (past@$K$), agents often fail to select them, revealing a verification gap.}
+    \label{fig:intro_figure}
+\end{figure*}
+
+
+Agents powered by large language models (LLMs) are at a turning point, transitioning from domain-specific \cite{liu2023fingpt,yang2024sweagent, yue2024clinicalagent} to general-purpose \cite{xi2023rise, luo2025large}. Real-world user requests are often open-ended and require LLM agents to operate end-to-end through planning \cite{wang2023plan, erdogan2025planandact}, reasoning \cite{Wei2022CoT, yao2022react, parmar2025plangen}, and tool use \cite{schick2023toolformer, patil2024gorilla} under uncertain and evolving conditions. A capable general agent is expected to compose multiple skills and tools (e.g., search, coding, computation, and MCP APIs) to handle the diversity of realistic requests\cite{claudeskills}, while exhibiting effective test-time scaling abilities to address increasing task complexity and enhance response quality \cite{Wang2022SelfConsistency, brown2024large, snell2024scaling}. This shift raises an important evaluation gap: beyond asking \emph{“can the model solve a task,”} we must assess whether agents can \emph{infer user intent, select specific tools, and scale up their performance under a unified evaluation framework across diverse domains}.
+
+Existing agentic benchmarks typically evaluate LLM agents in domain-specific settings, where the environment and available toolsets are explicitly designed for a particular task category (e.g., software engineering with a Docker environment and terminal tools \cite{jimenez2023swebench, Aleithan2024SWEBenchPlus}, or web navigation with a browsing interface \cite{zhou2023webarena, he2024webvoyager, wei2025browsecomp}). Conversely, actual user interactions are rarely so constrained; they typically involve multi-turn, open-ended requests spanning disparate domains, requiring agents to remain ready across a broad toolset to handle unpredictable queries. As a result, while current benchmarks are informative for domain-specific agent development, they may not fully capture the demands of real-world usage and can overestimate robustness under realistic, multi-domain conditions.
+
+
+% A defining challenge in this setting is reasoning over long, evolving contexts. The unified toolset itself contributes substantial context through tool descriptions, parameters, and policies, and multi-turn trajectories further expand context via tool outputs and the agent’s own prior decisions.To study how agents behave under such dynamically growing contexts, we use test-time scaling as a practical lens to examine whether agents can stabilize or even improve as context length increases.
+
+In this paper, we address this gap by introducing General AgentBench, a benchmark designed to evaluate general-purpose agents across diverse scenarios under a unified framework that more closely reflects real-world user interactions. We consolidate tools from all domains into a shared interface that is consistently exposed to evaluated agents across different tasks, while domain-specific environments and implementations remain hidden. We evaluate ten leading LLM-based agents, each of which must first interpret the user request, then choose suitable tools from a large and diverse tool pool, and iteratively interact with the environment until producing a final response. 
+
+For complex requests that exceed the capabilities of a short interaction horizon, agents can benefit from increased inference-time computation—a strategy known as test-time scaling and extensively studied in the context of non-agentic reasoning \cite{cobbe2021training, zelikman2024quiet, guo2025deepseek}. We focus on two primary scaling strategies: (1) sequential scaling, which extends interaction histories to support continued reasoning, reflection, and exploration; and (2) parallel scaling, which independently samples $K$ candidate trajectories and selects a single candidate to return. More concretely, effective parallel scaling requires agents not only to \textbf{generate} correct solutions, but also to reliably \textbf{identify and choose} the correct one, since real-world agents cannot present multiple responses simultaneously. Together, these settings enable a systematic study of test-time scaling behaviors in general LLM agents.
+
+Our results lead to three key conclusions. (1) Across ten leading LLMs, we observe a substantial performance drop when moving from domain-specific configurations to the general-agent setting (Figure~\ref{fig:intro_a}), with pronounced differences in robustness across model families. Among them, Claude exhibits the strongest robustness, while most other models experience performance drops of approximately 30\%. (2) Sequential scaling exhibits an effective context length ceiling (\textbf{context ceiling}): while performance improves within a modest range of additional interaction turns, it often fluctuates or degrades thereafter. This suggests that the accumulated history eventually overwhelms the agent's reasoning capacity, leading to instability in long-horizon tasks. (Figure~\ref{fig:intro_b}). (3) Although parallel scaling increases the theoretical upper bound of performance (past@$K$), we consistently observe a gap between this upper bound and self-choice accuracy, revealing a substantial \textbf{verification gap} that ultimately limits achievable performance in realistic settings (Figure~\ref{fig:intro_c}). In summary, our contributions are:
+
+% We further conduct detailed analyses to reveal distinct behaviors of general agents on our benchmark, including cross-domain tool-use selection, mechanisms behind sequential-scaling degradation, and comparisons of attention distance between linear and full attention mechanisms.
+
+\begin{itemize}
+\item \textbf{General AgentBench for Realistic Evaluation.} 
+We introduce General AgentBench, a benchmark for evaluating whether agents can compose multiple skills and tools to solve open-ended requests from diverse domains under a unified framework, more closely reflecting real-world user interactions.
+
+\item \textbf{Sequential Test-time Scaling in General Agents.} 
+We study the sequential test-time scaling behavior of general agents, showing that performance improvements are bounded by an effective context ceiling, beyond which additional computation often leads to instability and performance degradation. This inherent point varies across models and domains.
+
+\item \textbf{Parallel Test-time Scaling.} 
+We analyze parallel test-time scaling and show that, despite increasing the theoretical performance upper bound (past@$K$), its practical gains are limited by a verification gap between generation and model self-choice accuracy.
+\end{itemize}
+

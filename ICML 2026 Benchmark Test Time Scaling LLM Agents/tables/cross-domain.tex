@@ -1,0 +1,23 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Failure analysis under the omni setting. We categorize incorrect outcomes based on whether the agent fails after invoking tools from an incorrect domain or fails despite selecting tools from the correct domain. Results are aggregated by task domain.}
+\label{tab:tool_failure_recovery}
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Domain}
+& \textbf{Failure with Incorrect-Domain Tools}
+& \textbf{Failure with Correct-Domain Tools} \\
+\midrule
+Search    & 17 & 90 \\
+Code      & 6  & 60 \\
+Reason    & 2  & 46 \\
+Tool-Use  & 15 & 67 \\
+\midrule
+Avg       & 40 (9.1\%) & 263 (60.0\%) \\
+\bottomrule
+\end{tabular}
+
+\end{table}

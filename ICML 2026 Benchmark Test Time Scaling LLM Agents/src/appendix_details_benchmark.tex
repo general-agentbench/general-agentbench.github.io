@@ -1,0 +1,74 @@
+\section{Additional Experimental Results}
+
+\subsection{Agentic Benchmarks}
+
+\paragraph{Coding} We include tasks from SWE-Bench Verified\cite{openai_swebench_verified_2024} and Terminal Bench for the code domain. SWE-Bench Verified consists of real-world GitHub issues that require the model to analyze and propose concrete bug fixes, with evaluation performed through automated test pass rates. Terminal Bench assesses a model’s ability to solve problems within a terminal environment, requiring not only command-line common sense but also the ability to plan and reason over long user instructions. It examinzes the score by checking whether the model achieves the expected final state. 
+
+
+\paragraph{Reason} For this domain, we adopt MathHay\cite{wang2024mathhay} as our data source. MathHay collects mathematical information grounded in real web documents. For each group of related documents, specific pieces of information are extracted and linked to form a query. The benchmark then constructs a long-context haystack by inserting these relevant documents into noisy text placed at the beginning, middle, or end of the sequence. This design provides a suitable testbed for evaluating the model's long‑context reasoning ability. One thing to note is that no raw tools are provided in this benchmark.
+
+Most reasoning benchmarks provide all necessary information directly within the query and ask the model to perform complex mathematical or scientific derivations. As a result, they naturally lack an interactive environment that can deliver feedback, making them unsuitable for multi-turn evaluation. However, we can simulate multi-turn interaction by explicitly prompting the model to refine its own answers over additional turns, effectively creating self-reflective reasoning cycles. A key requirement for such evaluation is that the query context must be sufficiently long to allow meaningful iterative improvement. 
+
+\paragraph{Search} For the search domain, we include tasks from BrowseComp\cite{wei2025browsecomp} and WebVoyager\cite{he2024webvoyager}, aiming to evaluate a model’s ability to locate accurate information within long, evolving contexts. In contrast to Needle-in-a-Haystack or purely textual retrieval tasks, agentic search requires the model to reason about what information is needed, determine whether the current context is sufficient to answer the query, and decide when additional search steps are necessary. Mind2Web and WebVoyager focus on everyday web-browsing tasks—such as shopping, navigation, and entertainment—and rely on external language models or task-specific agents to assess model performance. BrowseComp, in contrast, presents challenging, hard-to-find information queries that require multi-step investigation across the web. The model’s final answers are compared against expert-curated gold references to produce the evaluation score.
+
+\paragraph{Tool-use} For the tool-use domain, we include tasks from Tau2-Bench\cite{barres2025tau2} and MCP-Bench\cite{wang2025mcpbench}, both of which provide extensive tool suites for evaluating a model’s ability to understand, select, and invoke the appropriate tool to solve a problem. Tau2-Bench focuses on customer-service scenarios, where the model acts as a customer-support agent responding to simulated user queries using a set of synthetic tools tailored to the scenario. MCP-Bench, in contrast, offers a collection of real-world tools built on the Model Context Protocol (MCP), requiring models to perform dense tool calling and coordinate across multiple tools to complete complex tasks. 
+
+Both benchmarks require multi-turn interaction with a simulated environment, and the complexity and richness of the task specifications make them nearly unsolvable within a short context window.
+
+
+While the coding and search domains can be viewed as specific instances of tool use—since they also involve code-execution tools and search APIs—the tool-use domain in General AgentBench significantly broadens the definition of “tools.” It requires models to precisely control tool parameters, reason about which tool to invoke and when, and plan multi-step interactions based on previous own generation and external feedback.
+
+\subsection{Detailed Results Comparison}~\label{appendix:agentic_benchmark_details}
+
+Table~\ref{tab:baseline_vs_general} reports the detailed performance of all evaluated models on both the original domain-specific benchmarks and our General AgentBench setting. These results serve as the data source for Figure~\ref{fig:domain_degradation} and Figure~\ref{fig:mean_degradation}.
+
+\input{tables/main_results} 
+
+
+
+
+\begin{figure}[h]
+        \centering
+        \includegraphics[width=0.8\linewidth]{figs/task_correlation.pdf}
+        \caption{\textbf{Pairwise correlation between static long-context benchmarks and agentic domains.} “All” denotes the average performance across the search, code, reasoning, and tool-use domains.}
+        \label{fig:corr}
+\end{figure}
+
+\begin{figure}[h]
+        \centering
+        \includegraphics[width=0.8\linewidth]{figs/model_pair_wise_consistency.pdf}
+        \caption{\textbf{Pairwise correlation between models.}}
+        \label{fig:corr_models}
+\end{figure}
+
+\subsection{Comparison with related long-context benchmarks} \label{appendix:long_compare}
+
+\input{tables/previous_long_context}
+
+With unified toolsets alone already approaching 64K tokens, the addition of user queries and multi-turn interaction histories can easily push the total context length to nearly 128K tokens. As a result, long-context processing naturally emerges as a core capability required for general agents. However, existing long-context benchmarks differ fundamentally from agentic long-context scenarios. As summarized in Table~\ref{tab:taxonomy}, we identify two key dimensions along which prior benchmarks diverge from agentic settings.
+
+(1) \textbf{Context composition.} Most existing long-context benchmarks are dominated by long-document question answering (QA), where the interaction paradigm remains static and single-turn. In contrast, agentic contexts are inherently heterogeneous: beyond long documents, they include environment feedback (e.g., tool execution results) and the model’s own prior decisions accumulated through multi-turn interactions.
+
+(2) \textbf{Long-output reasoning.} Other established benchmark categories, such as many-shot in-context learning and summarization, involve long inputs but require only relatively short outputs. Agentic tasks, however, demand sustained reasoning over extended contexts, including plan generation, iterative reflection, and explicit tool-call specifications, often resulting in long and structured outputs. While retrieval-based tasks and recent citation-grounded generation benchmarks partially resemble agentic scenarios, they still lack the multi-turn, interactive dynamics essential to true agentic settings.
+
+These fundamental differences suggest that performance measured on prior non-agentic long-context benchmarks does not directly reflect model behavior under agentic interaction. 
+
+\input{tables/long_benchmark}
+
+\subsection{Transferability of Long-Context Abilities from Static to Agentic Benchmarks}\label{appendix:long}
+
+Long-context processing is a fundamental requirement for general agents, as unified toolsets and accumulated multi-turn interactions can rapidly extend the effective context length during real-world use. However, it remains unclear whether performance measured on existing \emph{static}, single-turn long-context benchmarks meaningfully transfers to \emph{agentic} settings, where context evolves dynamically through interaction and decisions must be made sequentially. To study this question, we evaluate models on several representative static long-context benchmarks and examine how their performance correlates with results on General AgenticBench. We choose LongBench, HELMET, and MRCR here.
+
+\paragraph{LongBench v2}
+LongBench v2 is an updated and expanded version of LongBench, designed to evaluate language models under diverse long-context understanding tasks across multiple domains. It covers a broad set of settings, including long-document question answering, multi-document reasoning, summarization, code understanding, and many-shot in-context learning. Compared to the original LongBench, v2 increases both context length and task diversity, and introduces harder examples that stress retrieval accuracy and reasoning robustness under long inputs. Despite its breadth, LongBench v2 remains fundamentally \emph{single-turn} and \emph{static} in interaction structure. All necessary information is provided upfront, and models are evaluated on their ability to extract, aggregate, or reason over relevant spans within a fixed context window. Outputs are typically short and final, without iterative refinement or environment feedback. As a result, LongBench v2 primarily measures long-context comprehension and retrieval, rather than the dynamic decision-making, planning, and self-conditioning behaviors required in agentic multi-turn settings.
+
+\paragraph{HELMET}
+HELMET is a holistic benchmark for evaluating long-context language models across a curated set of real-world and synthetic tasks. It emphasizes robustness, faithfulness, and information utilization under long inputs, and includes task categories such as long-document QA, summarization, citation-grounded generation, and structured information extraction. HELMET is particularly focused on evaluating whether models can correctly attribute claims to source documents and avoid hallucinations when operating over extended contexts.
+
+\paragraph{MRCR}
+MRCR focuses on evaluating a model’s ability to perform multi-round coreference and entity tracking under long contexts. The benchmark constructs documents containing repeated, interleaved references to entities across long spans, requiring the model to resolve pronouns, aliases, and implicit references over multiple turns or segments. Tasks are designed to test memory persistence and consistency, particularly in scenarios where earlier mentions are far removed from later queries.
+
+
+
+Across ten models, we compute Pearson correlations over pairwise absolute performance differences between static long-context benchmarks and the four agentic domains. As shown in Figure~\ref{fig:corr}, static benchmarks exhibit consistently weak correlation with agentic performance overall, indicating limited transferability from static long-context ability to agentic long-context reasoning. A moderate correlation is observed between MRCR and the reasoning domain, which is expected: reasoning tasks primarily involve extracting and computing over long documents without tool interaction, closely aligning with the characteristics of MRCR. Other agentic domains show substantially lower alignment. In particular, coding and tool-use exhibit minimal correlation with static benchmarks, suggesting that agentic performance depends not only on long-context comprehension, but also on dynamic decision-making and precise execution. These results highlight a fundamental gap between static, single-turn long-context evaluation and the requirements of realistic agentic settings. We further provide correlations across different models on the General AgenticBench as shown in Figure~\ref{fig:corr_models}.
+

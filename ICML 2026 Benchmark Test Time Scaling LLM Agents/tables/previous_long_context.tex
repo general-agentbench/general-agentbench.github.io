@@ -1,0 +1,27 @@
+\begin{table}[ht]
+\centering
+\small
+\caption{Performance on Traditional Long-Context Benchmarks. We report scores across three established benchmarks focusing on retrieval and single-turn comprehension. Bold indicates the best performance in each category.}
+% \caption{Performance on Traditional Long-Context Benchmarks. We report scores across three established benchmarks focusing on retrieval and single-turn comprehension. Bold indicates the best performance in each category.}
+\label{tab:long_context_baselines}
+\setlength{\tabcolsep}{10pt}
+\begin{tabular}{@{} l ccc @{}}
+\toprule
+\textbf{Models} & \textbf{LongBench} & \textbf{HELMET} & \textbf{MRCR} \\
+\midrule
+\textit{Open-Source} & & & \\
+GPT-OSS-120B      & 47.8 & 12.9 & 32.8 \\
+Qwen3-235B-A22B   & 58.3 & 40.8 & 40.6 \\
+Qwen3-Next        & 53.1 & 26.3 & 27.9 \\
+DeepSeek-V3.2     & 50.3 & 48.0 & 33.2 \\
+DeepSeek-R1       & 58.3 & 36.9 & 39.2 \\
+\addlinespace[0.5em]
+\textit{Frontier} & & & \\
+Gemini 2.5-Flash  & 62.1 & 27.8 & 67.4 \\
+Gemini 2.5-Pro    & 63.3 & \bfseries 63.1 & \bfseries 80.0 \\
+Claude Haiku 4.5  & 55.3 & 50.4 & 33.3 \\
+Claude Sonnet 4.5 & 61.8 & 49.2 & 35.5 \\
+GPT-5             & \bfseries 64.6 & 51.6 & 79.1 \\
+\bottomrule
+\end{tabular}
+\end{table}

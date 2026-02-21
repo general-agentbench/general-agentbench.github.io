@@ -1,0 +1,125 @@
+\section{Full Attention: Softmax Attention}
+
+\subsection{Standard Attention Computation}
+For Full Attention layers, we utilize Scaled Dot-Product Attention:
+\begin{equation}
+\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right) V
+\end{equation}
+
+\subsection{Qwen3-Next Full Attention Features}
+The implementation includes specific architectural enhancements:
+\begin{enumerate}
+    \item \textbf{Gated Projection}: The hidden state $h$ is projected to generate both the queries and a gating signal:
+    \begin{equation}
+    [Q, G] = \text{split}(W_{qg} \cdot h)
+    \end{equation}
+    
+    \item \textbf{Normalization}: RMSNorm is applied to $Q$ and $K$ to stabilize training:
+    \begin{equation}
+    Q_{norm} = \text{RMSNorm}(Q), \quad K_{norm} = \text{RMSNorm}(K)
+    \end{equation}
+    
+    \item \textbf{Rotary Position Embedding (RoPE)}:
+    \begin{equation}
+    Q', K' = \text{RoPE}(Q_{norm}, K_{norm}, \text{pos})
+    \end{equation}
+    
+    \item \textbf{Gated Output}: The final attention result is modulated by the sigmoid-activated gate:
+    \begin{equation}
+    \text{output} = \sigma(G) \odot \text{Attention}(Q', K', V)
+    \end{equation}
+\end{enumerate}
+
+\section{Linear Attention: Gated Delta Rule}
+
+\subsection{DeltaNet Mechanism}
+The Gated Delta Rule maintains a key-value memory state $S_t$. Unlike standard linear attention, it utilizes a "Delta" update to minimize prediction error.
+
+\subsubsection{State Update Formulas}
+For each time step $t$, the state $S \in \mathbb{R}^{d_k \times d_v}$ is updated as follows:
+\begin{enumerate}
+    \item \textbf{State Decay}: $\tilde{S}_{t-1} = \gamma_t \cdot S_{t-1}$, where $\gamma_t = \exp(g_t)$.
+    \item \textbf{Prediction Error}: $\delta_t = v_t - \tilde{S}_{t-1} k_t$.
+    \item \textbf{Delta Rule Update}:
+    \begin{equation}
+    S_t = \gamma_t S_{t-1} + \beta_t (k_t \otimes \delta_t)
+    \end{equation}
+    where $\beta_t \in [0, 1]$ acts as a dynamic learning rate.
+\end{enumerate}
+
+\subsection{Converting DeltaNet to Q, K, V Form}
+
+\subsubsection{Effective Keys Concept}
+To extract an $N \times N$ matrix from a recurrent process, we track \textbf{effective keys} $\hat{k}_j^{(i)}$, representing the contribution of position $j$ to the state at time $i$.
+
+Update rules for position $i$:
+\begin{align}
+\hat{k}_j^{(i)} &= \gamma_i \hat{k}_j^{(i-1)} - \beta_i (k_i \cdot (\gamma_i \hat{k}_j^{(i-1)})) k_i, \quad \forall j < i \\
+\hat{k}_i^{(i)} &= \beta_i k_i
+\end{align}
+
+\subsubsection{Attention Weight Extraction}
+The simulated attention weights are computed as:
+\begin{equation}
+\boxed{A_{ij} = q_i \cdot \hat{k}_j^{(i)}}
+\end{equation}
+
+\subsection{Decay Matrix}
+The cumulative decay $D_{ij}$ between positions $j$ and $i$ ($j \leq i$) is:
+\begin{equation}
+D_{ij} = \exp \left( \sum_{t=j+1}^{i} g_t \right)
+\end{equation}
+
+\subsection{Complete Extraction Algorithm}
+
+\begin{algorithm}[H]
+\caption{Gated Delta Rule Attention Matrix Extraction}
+\begin{algorithmic}[1]
+\Require $Q, K, V \in \mathbb{R}^{n \times d}$, decay gate $g \in \mathbb{R}^n$, learning rate $\beta \in \mathbb{R}^n$
+\Ensure Attention matrix $A \in \mathbb{R}^{n \times n}$
+\State $Q, K \gets \text{L2Norm}(Q), \text{L2Norm}(K)$
+\State $S \gets \mathbf{0}^{d_k \times d_v}$
+\State $\hat{K} \gets \mathbf{0}^{n \times d_k}$ \Comment{Matrix of effective keys}
+\For{$i = 1$ to $n$}
+    \State $\gamma_i \gets \exp(g_i)$
+    \State $\hat{K}_{1:i-1} \gets \gamma_i \hat{K}_{1:i-1} - \beta_i (\hat{K}_{1:i-1} k_i) \otimes k_i$ \Comment{Parallel unlearning update}
+    \State $\hat{K}_i \gets \beta_i k_i$
+    \State $A_{i, 1:i} \gets q_i \hat{K}_{1:i}^T$
+\EndFor
+\State \Return $A$
+\end{algorithmic}
+\end{algorithm}
+
+\section{Unique Properties and Metrics}
+
+\subsection{Weight Interpretation}
+\begin{itemize}
+    \item \textcolor{blue}{\textbf{Positive Weights ($A_{ij} > 0$)}}: Information retrieval/reinforcement.
+    \item \textcolor{red}{\textbf{Negative Weights ($A_{ij} < 0$)}}: Error correction/interference cancellation.
+\end{itemize}
+
+\subsection{Analysis Metrics}
+\begin{enumerate}
+    \item \textbf{Positive/Negative Mass}: $M^+ = \sum A_{ij}^+, \quad M^- = \sum |A_{ij}^-|$.
+    \item \textbf{Effective Context Length}:
+    \begin{equation}
+    L_{\text{eff}} = \frac{\sum_{j=1}^{i} D_{ij} \cdot (i - j + 1)}{\sum_{j=1}^{i} D_{ij}}
+    \end{equation}
+\end{enumerate}
+
+\section{Summary Comparison}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Feature} & \textbf{Full Attention} & \textbf{Linear Attention (Delta)} \\
+\midrule
+Weight Range & $[0, 1]$ & $(-\infty, +\infty)$ \\
+Normalization & RMSNorm + Softmax & L2Norm \\
+Positional Encoding & RoPE & Decay Gate $\gamma_t$ \\
+Memory Complexity & $O(N^2)$ & $O(N)$ (Recurrent Form) \\
+\bottomrule
+\end{tabular}
+\caption{Comparison of Attention Mechanisms in Qwen3-Next}
+\end{table}

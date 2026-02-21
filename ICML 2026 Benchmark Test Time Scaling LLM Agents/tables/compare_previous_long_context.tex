@@ -1,0 +1,29 @@
+\sisetup{round-mode=figures, round-precision=3}
+
+\begin{table*}[ht]
+\centering
+\small
+\caption{Main Results: Performance comparison across long-context and agentic benchmarks. \textbf{Agentic LongBench} highlights the performance gap between traditional retrieval-based tasks and multi-turn agentic reasoning. Bold indicates the best performance in each column. \cx{expand our tasks in each category, do not just show average.}}
+% \caption{Main Results: Performance comparison across long-context and agentic benchmarks. \textbf{Agentic LongBench} highlights the performance gap between traditional retrieval-based tasks and multi-turn agentic reasoning. Bold indicates the best performance in each column.}
+\label{tab:main_results}
+\setlength{\tabcolsep}{8pt}
+\begin{tabular}{@{} l *{3}{S[table-format=2.1]} *{5}{S[table-format=2.1]} @{}}
+\toprule
+\multirow{2.5}{*}{\textbf{Models}} & {\multirow{2.5}{*}{\textbf{LongB.}}} & {\multirow{2.5}{*}{\textbf{HELMET}}} & {\multirow{2.5}{*}{\textbf{MRCR}}} & \multicolumn{5}{c}{\textbf{Agentic LongBench (Ours)}} \\
+\cmidrule(l){5-9} 
+ & & & & {\textbf{Search}} & {\textbf{Code}} & {\textbf{Reason}} & {\textbf{Tool}} & {\textbf{All}} \\
+\midrule
+GPT-OSS-120B         & 47.8 & 12.9 & 32.8 & 17.6 & 16.9 & 46.7 & 65.2 & 36.6 \\
+Qwen3-235B-A22B      & 58.3 & 40.8 & 40.6 & 21.7 & 36.2 & 45.3 & 62.6 & 41.5 \\
+Qwen3-Next           & 53.1 & 26.3 & 27.9 & 16.1 & 22.3 & 44.0 & 55.8 & 34.6 \\
+DeepSeek-V3.2        & 50.3 & 48.0 & 33.2 & 24.6 & 32.3 & 17.3 & 61.9 & 34.0 \\
+DeepSeek-R1          & 58.3 & 36.9 & 39.2 & 16.6 & 23.1 & 37.3 & 44.7 & 30.4 \\
+\addlinespace[0.5em] % Visual separation for Frontier models
+Gemini 2.5-Flash     & 62.1 & 27.8 & 67.4 & 21.1 & 30.0 & 60.0 & 66.0 & 44.3 \\
+Gemini 2.5-Pro       & 63.3 & \bfseries 63.1 & \bfseries 80.0 & 23.4 & 26.9 & 61.3 & 66.0 & 44.4 \\
+Claude Haiku 4.5     & 55.3 & 50.4 & 33.3 & 23.6 & 41.5 & 54.7 & 64.5 & 36.7 \\
+Claude Sonnet 4.5    & 61.8 & 49.2 & 35.5 & 26.1 & \bfseries 49.2 & 32.0 & 73.0 & 45.1 \\
+GPT-5                & \bfseries 64.6 & 51.6 & 79.1 & \bfseries 55.8 & 45.4 & \bfseries 64.0 & \bfseries 78.3 & \bfseries 60.9 \\
+\bottomrule
+\end{tabular}
+\end{table*}

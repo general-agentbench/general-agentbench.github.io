@@ -1,0 +1,40 @@
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Outcome transition patterns across domains under sequential scaling.
+We compare point-wise correctness between the initial (short) context and the maximum context length
+for \textsc{Gemini-2.5-Flash} and \textsc{Qwen3-Next}.}
+\label{tab:outcome_transition}
+\setlength{\tabcolsep}{4.5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{l cc cc cc cc}
+\toprule
+\textbf{Transition Type}
+& \multicolumn{2}{c}{\textbf{Search}}
+& \multicolumn{2}{c}{\textbf{Code}}
+& \multicolumn{2}{c}{\textbf{Reason}}
+& \multicolumn{2}{c}{\textbf{Tool-Use}} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9}
+& \rotatebox{90}{\textbf{Gemini}}
+& \rotatebox{90}{\textbf{Qwen3}}
+& \rotatebox{90}{\textbf{Gemini}}
+& \rotatebox{90}{\textbf{Qwen3}}
+& \rotatebox{90}{\textbf{Gemini}}
+& \rotatebox{90}{\textbf{Qwen3}}
+& \rotatebox{90}{\textbf{Gemini}}
+& \rotatebox{90}{\textbf{Qwen3}} \\
+\midrule
+\emph{Failure} to \emph{Correct}
+& 6   & 2   & 6   &     & 6   & 1   & 4   & 4   \\
+\emph{Correct} to \emph{Failure}
+& 2   & 9   & 2   &     & 6   & 3   & 2   & 4   \\
+
+\cdashline{1-9}
+
+Consistent \emph{Correct}
+& 29  & 21  & 29  &     & 31  & 34  & 4   & 20  \\
+Consistent \emph{Failure}
+& 162 & 167 & 162 &     & 32  & 37  & 40  & 22   \\
+\bottomrule
+\end{tabular}
+\end{table}

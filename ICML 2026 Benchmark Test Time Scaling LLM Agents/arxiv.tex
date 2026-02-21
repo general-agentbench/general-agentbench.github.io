@@ -1,0 +1,142 @@
+\documentclass{article}
+
+
+
+\usepackage{arxiv}
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{lipsum}		% Can be removed after putting your text content
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{doi}
+\usepackage{tabularx}
+\usepackage{makecell}
+\usepackage[table]{xcolor}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{subcaption}
+\usepackage[many,most]{tcolorbox}
+\usepackage{siunitx} % Critical for aligning decimals
+
+\newtcolorbox[auto counter, number within=section]{NewBox}[2]{%
+  float*, width=\textwidth,
+  colback=white, colframe=black,
+  colbacktitle=white, coltitle=black,
+  fonttitle=\bfseries,
+  boxrule=1.0pt,
+  leftupper=0.5em, rightupper=0.5em,
+  title={#1},
+  label={#2},
+}
+
+
+
+\newcommand{\haok}[1]{{\color{purple}\textbf{haok:} #1}}
+\newcommand{\andy}[1]{{\color{magenta}\textbf{andy:} #1}}
+\newcommand{\abhijay}[1]{{\color{teal}\textbf{abhijay:} #1}}
+\newcommand{\pranav}[1]{{\color{orange}\textbf{pranav:} #1}}
+\newcommand{\xiaochuan}[1]{{\color{red}\textbf{xiaochuan:} #1}}
+\newcommand{\ryan}[1]{{\color{cyan}\textbf{ryan:} #1}}
+
+
+
+
+% \title{Beyond Tokens: An Empirical study on LLMs’ long-horizon agent performance}
+\title{Agentic LongBench: Evaluating Test-Time Scaling Behavior of Language Models in Agentic Tasks}
+
+%\date{September 9, 1985}	% Here you can change the date presented in the paper title
+%\date{} 					% Or removing it
+
+% \author{ \href{https://orcid.org/0000-0000-0000-0000}{\includegraphics[scale=0.06]{orcid.pdf}\hspace{1mm}David S.~Hippocampus}
+% % \thanks{Use footnote for providing furtherinformation about author (webpage, alternativeaddress)---\emph{not} for acknowledging funding agencies.}
+%     \\
+% 	Department of Computer Science\\
+% 	Cranberry-Lemon University\\
+% 	Pittsburgh, PA 15213 \\
+% 	\texttt{hippo@cs.cranberry-lemon.edu} \\
+% 	%% examples of more authors
+% 	\And
+% 	\href{https://orcid.org/0000-0000-0000-0000}{\includegraphics[scale=0.06]{orcid.pdf}\hspace{1mm}Elias D.~Striatum} \\
+% 	Department of Electrical Engineering\\
+% 	Mount-Sheikh University\\
+% 	Santa Narimana, Levand \\
+% 	\texttt{stariate@ee.mount-sheikh.edu} \\
+% 	%% \AND
+% 	%% Coauthor \\
+% 	%% Affiliation \\
+% 	%% Address \\
+% 	%% \texttt{email} \\
+% 	%% \And
+% 	%% Coauthor \\
+% 	%% Affiliation \\
+% 	%% Address \\
+% 	%% \texttt{email} \\
+% 	%% \And
+% 	%% Coauthor \\
+% 	%% Affiliation \\
+% 	%% Address \\
+% 	%% \texttt{email} \\
+% }
+
+% Uncomment to remove the date
+%\date{}
+
+% Uncomment to override  the `A preprint' in the header
+%\renewcommand{\headeright}{Technical Report}
+%\renewcommand{\undertitle}{Technical Report}
+\renewcommand{\shorttitle}{\textit{arXiv} Template}
+\definecolor{midnightgreen}{rgb}{0.0, 0.29, 0.33}
+\newcommand{\cx}[1]{\textcolor{midnightgreen}{\bf\small [#1 --cx]}}
+%%% Add PDF metadata to help others organize their library
+%%% Once the PDF is generated, you can check the metadata with
+%%% $ pdfinfo template.pdf
+% \hypersetup{
+% pdftitle={A template for the arxiv style},
+% pdfsubject={q-bio.NC, q-bio.QM},
+% pdfauthor={David S.~Hippocampus, Elias D.~Striatum},
+% pdfkeywords={First keyword, Second keyword, More},
+% }
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+% and therefore require language models to possess robust multi-turn reasoning capabilities
+Agentic tasks—such as codebase debugging and web information retrieval—naturally involve long contexts and represent a key bottleneck in evaluating and deploying LLM capabilities in real-world settings. While prior work has shown that test-time scaling can be effective for them, increasing inference-compute also causes interaction histories to grow: multiple rounds of model generation and environmental feedback become interleaved, forming complex, evolving contexts that are not adequately captured by existing synthetic, text-only long-context benchmarks. To address this gap, we introduce Agentic LongBench, evaluating frontier LLMs on diverse agentic tasks with long and easily extensible context. Additionally, we study two primary test-time scaling paradigms on our benchmark—parallel scaling and sequential scaling—to characterize model scaling behavior. By extending context lengths up to 256K tokens and sampling up to eight trajectories, we find that allocating compute to self-refinement yields limited performance gains, whereas increasing the number of samples leads to substantial improvements. Additionally, we provide two further analyses—attention analysis and agent design analysis—to demonstrate how our benchmark can be used to study design factors that influence models’ agentic capabilities.
+\cx{switch to ICML template???}
+% We further compare full attention, sparse attention, and linear attention mechanisms to analyze how attention types impact long-context agentic performance. Finally, we propose an all-in-one agentic system that removes task-specific prompts and allows the model to autonomously determine its strategy. Our findings offer new insights into the scaling behavior of LLMs on long-context agentic tasks and provide a foundation for evaluating and designing models capable of sustained, multi-turn interaction with complex environments.
+
+% However, existing long-context benchmarks either over-simplify task settings—as in synthetic problems (e.g., Needle-in-a-Haystack) and purely textual evaluations (e.g., paragraph reranking)—or fail to reflect the interaction patterns of real-world agentic tasks, which are inherently multi-turn rather than single-turn.
+
+
+% It covers four agentic categories and ensures each task involves sufficiently long interaction trajectories. 
+\end{abstract}
+% , including both dense and sparse attention architectures. 
+
+
+% keywords can be removed
+% \keywords{First keyword \and Second keyword \and More}
+
+
+\input{src/1intro}
+
+\input{src/2benchmark}
+
+\input{src/3mainresults}
+
+\input{src/4analysis}
+
+\input{src/5multitask_system}
+
+\bibliographystyle{unsrtnat}
+
+\newpage
+\input{src/6appendix}
+
+\end{document}

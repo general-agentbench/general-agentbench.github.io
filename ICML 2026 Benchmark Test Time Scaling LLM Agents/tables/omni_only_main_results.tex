@@ -1,0 +1,68 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{Main results on \textbf{General AgentBench}. Benchmarks are grouped by domain. \textbf{Avg.} denotes the mean score across all available benchmarks for each model. Bold indicates the best score.}
+\label{tab:omni_only_domain_avg}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{} l rr rr r rr r @{}}
+\toprule
+\multirow{2}{*}{\textbf{Models}} &
+\multicolumn{2}{c}{\textbf{Search}} &
+\multicolumn{2}{c}{\textbf{Code}} &
+\textbf{Reason} &
+\multicolumn{2}{c}{\textbf{Tool-use}} &
+\multirow{2}{*}{\textbf{Avg.}} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-6} \cmidrule(lr){7-8}
+& \textbf{BrowseComp} & \textbf{WebVoyager}
+& \textbf{SWE-Bench} & \textbf{Terminal-Bench}
+& \textbf{MathHay}
+& \textbf{Tau2-Bench} & \textbf{MCP-Bench}
+& \\
+\midrule
+
+\textit{Open-Source} \\
+
+GPT-OSS-120B
+& 4.0 & 27.7 & 12.0 & 6.3 & 38.7 & 26.0 & 63.3 & 25.4 \\
+
+Qwen3-235B-A22B
+& 8.9 & 30.8 & 20.4 & 23.8 & 32.0 & 38.3 & 66.1 & 31.5\\
+
+Qwen3-Next
+& 10.5 & 35.4 & 18.0 & 8.8 & 42.0 & 48.9 & 64.6 & 32.6 \\
+
+DeepSeek-V3.2
+& 19.4 & 46.2 & 31.8 & 22.2  & 33.3 &  \bfseries
+ 54.0 &  66.0 & 39.0 \\
+
+DeepSeek-R1
+& 9.7 & 43.1 & 14.0 & 8.8 & 46.7 & 17.1 & 62.2 & 28.8 \\
+
+\hline
+% \addlinespace[0.5em]
+\textit{Proprietary} \\
+
+Gemini 2.5-Flash
+& 6.5 & 32.3 & 14.0 & 20.0 & 36.0 & 38.3 & 66.6 & 30.5 \\
+
+Gemini 2.5-Pro
+& 8.9 & 46.2 & 26.0 & 27.5 & 24.0 & 46.0 & 67.2 & 35.1 \\
+
+Claude Haiku 4.5
+& 17.7 & 47.7 & \bfseries
+ 56.0 & 25.0 & 34.7 & 44.0 & 69.0 & 42.0 \\
+
+Claude Sonnet 4.5
+& 23.1 & 56.9 & 54.0 & \bfseries
+ 45.0 & 36.0 & 48.0 & \bfseries
+ 72.9 & \bfseries 48.0 \\
+
+GPT-5
+& \bfseries
+ 27.4 & \bfseries
+ 61.5 & 36.0 & 41.3 & \bfseries
+ 64.0 & 32.0 & 59.1 & 45.9 \\
+
+\bottomrule
+\end{tabular}
+\end{table*}

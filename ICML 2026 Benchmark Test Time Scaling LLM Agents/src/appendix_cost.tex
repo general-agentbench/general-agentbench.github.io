@@ -1,0 +1,315 @@
+\section{Estimated Cost}\label{appendix:cost}
+
+\subsection{Pricing and accounting.}
+We report an estimated API budget for reproducing our evaluation under three settings:
+(i) \textbf{general (default context)} evaluation of each model on each domain once,
+(ii) \textbf{parallel scaling} that samples multiple independent trajectories per query, and
+(iii) \textbf{sequential scaling} that extends the interaction horizon over multiple steps.
+
+All prices are normalized as USD per 1M tokens and are taken from the corresponding model providers at the time of running the experiments. Due to uncertainty about the model provider's caching mechanism and evaluation intervals, we will use only the input unit price in our estimates, even if the provider supplies a cache unit price. 
+
+We compute cost by aggregating token usage from execution logs, using the provider-reported token accounting:
+\textbf{input tokens} (prompt + tool outputs + intermediate messages fed back to the model),
+and \textbf{output tokens} (model-generated tokens).
+For each model, the total cost is estimated as:
+\[
+\text{Cost} =
+p_{\text{in}}\cdot \tfrac{T_{\text{in}}}{10^6}
++ p_{\text{out}}\cdot \tfrac{T_{\text{out}}}{10^6},
+\]
+where $p_{\text{in}}, p_{\text{out}}$ denote the unit prices, and
+$T_{\text{in}}, T_{\text{out}}$ are the measured token counts.
+
+
+\subsection{Model cost}
+
+Table~\ref{tab:lite-version-cost} lists the unit API prices used in our cost estimation. Prices for input, cached input, and output are reported in USD per 1M tokens. Tables~\ref{tab:parallel-scaling-cost}--\ref{tab:general-setting-cost} summarize the aggregated evaluation cost per model under parallel scaling, sequential scaling, and the general (default context) setting, respectively.
+Each entry corresponds to running the full benchmark split of that dataset/domain under the specified protocol and then summing costs across all queries.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{Input} & \textbf{Cached Input} & \textbf{Output} \\
+\midrule
+Gemini-2.5-Flash      & 0.30 & 0.03  & 2.50 \\
+Gemini-2.5-Pro        & 1.25 & 0.125 & 10.00 \\
+GPT-5                 & 1.25 & 0.125 & 10.00 \\
+Claude-Haiku 4.5      & 1.00   & 0.50    & 5.00 \\
+Claude-Sonnet 4.5     & 3.00 & 3.75  & 15.00 \\
+\midrule
+gpt-oss-120B           & 0.15 & 0.075    & 0.60 \\
+Deepseek-R1           & 1.35 & --    & 5.40 \\
+Deepseek-V3.2         & 0.28 & --    & 0.42 \\
+Qwen3-235B            & 0.22 & 0.11    & 0.88 \\
+Qwen3-Next            & 0.15 & --    & 1.50 \\
+\bottomrule
+\end{tabular}
+\vspace{0.8em}
+\caption{Unit API prices (USD per 1M tokens) used in our cost estimation.}
+\label{tab:lite-version-cost}
+\end{table}
+
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Model} & \textbf{Search} & \textbf{MathHay} & \textbf{SWEBench} & \textbf{MCPBench} & \textbf{Tau2Bench} & \textbf{TerminalBench} & \textbf{Total} \\
+\midrule
+Gemini-2.5-Flash & \$193 & \$70.9 & \$12719 & \$122 & \$62.2 & \$826 & \$13993 \\
+DeepSeek-R1 & \$5188 & \$157 & \$3675 & \$492 & \$202 & \$1505 & \$11218 \\
+DeepSeek-V3.2 & \$369 & \$38.8 & \$7.80 & \$88.4 & \$54.4 & \$412 & \$970 \\
+Qwen3-235B & \$1254 & \$41.4 & \$1286 & \$120 & \$55.5 & \$409 & \$3166 \\
+Qwen3-Next & \$25.3 & \$9.52 & \$3.38 & \$21.2 & \$14.9 & \$154 & \$229 \\
+\midrule
+\textbf{Total} & \$7028 & \$317 & \$17692 & \$843 & \$389 & \$3307 & \$29576 \\
+\bottomrule
+\end{tabular}
+\vspace{1em}
+\caption{Cost for evaluating models under parallel scaling setting (USD)}
+\label{tab:parallel-scaling-cost}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Model} & \textbf{Search} & \textbf{MathHay} & \textbf{SWEBench} & \textbf{MCPBench} & \textbf{Tau2Bench} & \textbf{TerminalBench} & \textbf{Total} \\
+\midrule
+Gemini-2.5-Flash & \$5588 & \$369 & \$2024 & \$568 & \$852 & \$1870 & \$11271 \\
+DeepSeek-R1 & \$1267 & \$654 & \$892 & \$931 & \$1088 & \$782 & \$5614 \\
+DeepSeek-V3.2 & \$902 & \$333 & \$191 & \$79.1 & \$52.3 & \$356 & \$1913 \\
+Qwen3-235B & \$1370 & \$238 & \$436 & \$716 & \$162 & \$689 & \$3610 \\
+Qwen3-Next & \$442 & \$219 & \$392 & \$152 & \$251 & \$529 & \$1985 \\
+\midrule
+\textbf{Total} & \$9568 & \$1814 & \$3935 & \$2445 & \$2405 & \$4225 & \$24392 \\
+\bottomrule
+\end{tabular}
+\vspace{1em}
+\caption{Cost for evaluating models under sequential scaling setting (USD)}
+\label{tab:sequential-scaling-cost}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Model} & \textbf{Search} & \textbf{MathHay} & \textbf{SWEBench} & \textbf{MCPBench} & \textbf{Tau2Bench} & \textbf{TerminalBench} & \textbf{Total} \\
+\midrule
+Gemini-2.5-Pro & \$47.5 & \$18.6 & \$3253 & \$31.3 & \$15.2 & \$203 & \$3569 \\
+GPT-5 & \$87.5 & \$14.2 & \$146 & \$21.0 & \$12.4 & \$60.9 & \$342 \\
+Claude-Haiku-4.5 & \$304 & \$10.9 & \$312 & \$29.3 & \$14.1 & \$106 & \$776 \\
+Claude-Sonnet-4.5 & \$1248 & \$40.9 & \$926 & \$129 & \$52.0 & \$376 & \$2772 \\
+OpenAI-oss-120B & \$1.44 & \$1.49 & \$0.52 & \$0.50 & \$1.35 & \$0.40 & \$5.70 \\
+DeepSeek-V3.2 & \$96.8 & \$10.0 & \$1.92 & \$22.0 & \$14.0 & \$102 & \$247 \\
+Qwen3-Next & \$6.05 & \$2.42 & \$0.88 & \$5.51 & \$3.60 & \$38.2 & \$56.7 \\
+\midrule
+\textbf{Total} & \$1791 & \$98.5 & \$4640 & \$239 & \$113 & \$886 & \$7768 \\
+\bottomrule
+\end{tabular}
+\vspace{1em}
+\caption{Cost for evaluating models under general (default context) setting (USD)}
+\label{tab:general-setting-cost}
+\end{table}
+
+% Table \ref{tab:full-version-cost} reports the API costs for each model if the full datasets from all prior benchmarks were used instead of the sampled subsets.
+
+% \begin{table}[h]
+% \centering
+% \small
+% \begin{tabular}{lccccccccc}
+% \toprule
+%  & \multicolumn{3}{c}{\textbf{Search}} & \multicolumn{2}{c}{\textbf{Code}} & \multicolumn{1}{c}{\textbf{Reason}} & \multicolumn{2}{c}{\textbf{Tool Call}} & \\
+% \cmidrule(lr){2-4}\cmidrule(lr){5-6}\cmidrule(lr){7-7}\cmidrule(lr){8-9}
+% \textbf{Model} & \textbf{BC} & \textbf{WV} & \textbf{M2W} & \textbf{SWEB} & \textbf{TerB} & \textbf{MH} & \textbf{TauB} & \textbf{MCPB} & \textbf{Total} \\
+% \midrule
+% Gemini-2.5-Flash &  &  &  & \$237 & \$20 &  & \$18.86 & \$8.28 &  \\
+% Gemini-2.5-Pro &  &  &  & \$550 & \$80 &  & \$159.74 & \$28.81 &  \\
+% GPT-5 &  &  &  & \$400 & \$80 &  & \$10.16 & \$48.68 &  \\
+% Claude-Haiku 4.5 &  &  &  &  &  &  & \$3.45 & \$24.36 &  \\
+% Claude-Sonnet 4.5 &  &  &  & \$550 & \$100 &  & \$16.39 & \$58.84 &  \\
+% \midrule
+% gpt-oss-120B &  &  &  &  &  &  & \$5.11 & \$3.23 &  \\
+% Deepseek-R1 &  &  &  & \$400 & \$80 &  & \$8.87 & \$24.10 &  \\
+% Deepseek V3.2 &  &  &  & \$300 & \$80 &  & \$2.19 & \$6.33 &  \\
+% Qwen3-235B &  &  &  & \$100 & \$10 &  & \$8.86 & \$1.83 &  \\
+% Qwen3-Next &  &  &  &  &  &  & \$22.98 & \$7.26 &  \\
+% \midrule
+% \textbf{Total} &  &  &  & \$5380 & \$800 &  & \$256.61 & \$211.72 &  \\
+% \bottomrule
+% \end{tabular}
+% \vspace{1em}
+% \caption{Cost for evaluating models on the \textbf{full} datasets from prior benchmarks instead of sampling subsets.}
+% \label{tab:full-version-cost}
+% \end{table}
+
+
+% \subsection{Test-time scaling cost}
+
+% We provide the cost of running these models for different target context lengths, broken down by domain.
+
+% \begin{table}[h]
+%     \centering
+%     \small
+%     \caption{API cost of different models on the \textbf{Search} domain under varying context lengths.}
+%     \label{tab:search_cost_scale}
+%     \begin{tabular}{lcccc}
+%         \toprule
+%         \textbf{Model} 
+%             & \textbf{8k} 
+%             & \textbf{16k} 
+%             & \textbf{32k} 
+%             & \textbf{64k} \\
+%         \midrule
+%         Gemini-2.5-Flash & \$x.xx & \$x.xx & \$x.xx & \$x.xx \\
+%         gpt-oss-120B & \$x.xx & \$x.xx & \$x.xx & \$x.xx \\
+%         Deepseek-v3.2 & \$x.xx & \$x.xx & \$x.xx & \$x.xx \\
+%         Qwen3-235B & \$x.xx & \$x.xx & \$x.xx & \$x.xx \\
+%         Qwen3-Next & \$x.xx & \$x.xx & \$x.xx & \$x.xx \\
+%         \bottomrule
+%     \end{tabular}
+%     \vspace{0.5ex}
+% \end{table}
+
+% \begin{table}[h]
+%     \centering
+%     \small
+%     \caption{API cost of different models on the \textbf{Code} domain under varying context lengths.}
+%     \label{tab:code_cost_scale}
+%     \begin{tabular}{lcccc}
+%         \toprule
+%         \textbf{Model} 
+%             & \textbf{8k} 
+%             & \textbf{16k} 
+%             & \textbf{32k} 
+%             & \textbf{64k} \\
+%         \midrule
+%         Gemini-2.5-Flash & \$x.xx & \$x.xx & \$x.xx & \$x.xx \\
+%         gpt-oss-120B & \$x.xx & \$x.xx & \$x.xx & \$x.xx \\
+%         Deepseek-v3.2 & \$x.xx & \$x.xx & \$x.xx & \$x.xx \\
+%         Qwen3-235B & \$x.xx & \$x.xx & \$x.xx & \$x.xx \\
+%         Qwen3-Next & \$x.xx & \$x.xx & \$x.xx & \$x.xx \\
+%         \bottomrule
+%     \end{tabular}
+%     \vspace{0.5ex}
+% \end{table}
+
+
+% \begin{table}[h]
+%     \centering
+%     \small
+%     \caption{API cost of different models on the \textbf{Reason} domain under varying context lengths.}
+%     \label{tab:search_reason_scale}
+%     \begin{tabular}{lcccc}
+%         \toprule
+%         \textbf{Model} 
+%             & \textbf{1turn} 
+%             & \textbf{2turns} 
+%             & \textbf{4turns} 
+%             & \textbf{8turns} \\
+%         \midrule
+%         Gemini-2.5-Flash & \$x.xx & \$x.xx & \$x.xx & \$x.xx \\
+%         gpt-oss-120B & \$x.xx & \$x.xx & \$x.xx & \$x.xx \\
+%         Deepseek-v3.2 & \$x.xx & \$x.xx & \$x.xx & \$x.xx \\
+%         Qwen3-235B & \$x.xx & \$x.xx & \$x.xx & \$x.xx \\
+%         Qwen3-Next & \$x.xx & \$x.xx & \$x.xx & \$x.xx \\
+%         \bottomrule
+%     \end{tabular}
+%     \vspace{0.5ex}
+% \end{table}
+
+% \begin{table*}[ht]
+% \centering
+% \scriptsize
+% \begin{tabular}{l*{10}{c}}
+% \toprule
+% \multirow{2}{*}{\textbf{Models}} 
+%   & \multicolumn{4}{c}{\textbf{Parallel Scaling}} 
+%   & \multicolumn{6}{c}{\textbf{Sequential Scaling}} \\
+% \cmidrule(lr){2-5}\cmidrule(lr){6-11}
+%  & \textbf{Best@1} & \textbf{Best@2} & \textbf{Best@4} & \textbf{Best@8}
+%  & \textbf{4K} & \textbf{8K} & \textbf{12K} & \textbf{16K} & \textbf{22K} & \textbf{32K} \\
+% \midrule
+% gpt-oss-120B     & \$5.11  & \$10.01 & \$20.65 & \$41.72
+%                  & \$1.41  & \$5.41  & \$8.54  & \$49.91 & \$37.93 & \$172.15 \\
+% Qwen3-Next       & \$22.98 & \$34.36 & \$73.56 & \$115.13
+%                  & \$1.99  & \$4.26  & \$6.27  & \$14.17 & \$24.34 & \$48.05 \\
+% Qwen3-235B       & \$8.86  & \$18.15 & \$36.57 & \$81.08
+%                  & \$1.62  & \$10.47 & \$7.07  & \$31.77 & \$42.13 & \$88.63 \\
+% DeepSeek-V3.2    & \$2.19  & \$3.43  & \$6.10  & \$12.09
+%                  & \$0.33  & \$1.36  & \$4.47  & \$9.09  & \$19.76 & \$59.56 \\
+% Gemini-2.5-Flash & \$18.86 & \$34.04 & \$63.41 & \$107.14
+%                  & \$2.56  & \$12.84 & \$31.37 & \$157.91 & \$129.85 & \$382.52 \\
+% \midrule
+% \textbf{Total}   & \textbf{\$58.00} & \textbf{\$99.99} & \textbf{\$200.29} & \textbf{\$357.16}
+%                  & \textbf{\$7.91}  & \textbf{\$34.34} & \textbf{\$57.72}  & \textbf{\$262.85} 
+%                  & \textbf{\$254.01} & \textbf{\$750.91} \\
+% \bottomrule
+% \end{tabular}
+% \caption{$\tau^2$-Bench Parallel and Sequential Scaling Cost.}
+% \label{tab:tau2bench_parallel_sequential_cost}
+% \end{table*}
+
+
+
+% \begin{table*}[t]
+% \centering
+% \small
+% \resizebox{\linewidth}{!}{%
+% \begin{tabular}{lcccc*{15}{c}}
+% \toprule
+% \multirow{2}{*}{\textbf{Model}}
+%   & \multicolumn{4  }{c}{\textbf{Parallel Scaling}} 
+%   & \multicolumn{5}{c}{\textbf{Sequential Scaling (1-Server)}} 
+%   & \multicolumn{5}{c}{\textbf{Sequential Scaling (2-Server)}} 
+%   & \multicolumn{5}{c}{\textbf{Sequential Scaling (3-Server)}} \\
+% \cmidrule(lr){2-5}\cmidrule(lr){6-10}\cmidrule(lr){11-15}\cmidrule(lr){16-20}
+%  & \textbf{Best@1} & \textbf{Best@2} & \textbf{Best@4} & \textbf{Best@8}
+%  & \textbf{8k} & \textbf{16k} & \textbf{24k} & \textbf{32k} & \textbf{48k}
+%  & \textbf{16k} & \textbf{24k} & \textbf{32k} & \textbf{48k} & \textbf{64k}
+%  & \textbf{24k} & \textbf{32k} & \textbf{48k} & \textbf{64k} & \textbf{96k} \\
+% \midrule
+% OpenAI-oss-120B
+%  & \$3.23 & \$6.45 & \$12.97 & \$26.17
+%  & \$0.20 & \$0.23 & \$0.55 & \$2.35 & \$10.41
+%  & \$0.12 & \$0.59 & \$0.36 & \$1.10 & \$2.71
+%  & \$0.10 & \$0.14 & \$2.50 & \$2.77 & \$0.61 \\
+% Qwen3-Next
+%  & \$7.26 & \$14.31 & \$23.88 & \$51.11
+%  & \$0.30 & \$0.44 & \$1.80 & \$3.51 & \$8.07
+%  & \$0.22 & \$0.78 & \$3.10 & \$4.92 & \$7.22
+%  & \$0.17 & \$0.48 & \$2.12 & \$3.88 & \$1.22 \\
+% Qwen3-235B
+%  & \$1.83 & \$3.56 & \$7.03 & \$14.00
+%  & \$0.19 & \$1.31 & \$10.39 & \$24.65 & \$28.75
+%  & \$0.12 & \$0.45 & \$12.19 & \$43.95 & \$26.82
+%  & \$0.10 & \$0.68 & \$22.52 & \$73.28 & \$0.39 \\
+% DeepSeek-V3.2
+%  & \$6.33 & \$12.40 & \$20.57 & \$43.33
+%  & \$0.22 & \$0.30 & \$2.57 & \$8.51 & \$16.95
+%  & \$0.15 & \$1.05 & \$5.19 & \$4.24 & \$13.30
+%  & \$0.12 & \$0.41 & \$3.31 & \$13.45 & \$1.23 \\
+% Gemini-2.5-Flash
+%  & \$8.28 & \$16.21 & \$33.47 & \$64.07
+%  & \$0.38 & \$0.49 & \$6.29 & \$24.90 & \$46.74
+%  & \$0.27 & \$0.68 & \$7.73 & \$21.40 & \$33.37
+%  & \$0.26 & \$0.70 & \$3.24 & \$35.55 & \$1.72 \\
+% \midrule
+% \textbf{Total}
+%  & \$\textbf{26.93} & \$\textbf{52.93} & \$\textbf{97.92} & \$\textbf{198.68}
+%  & \$\textbf{1.29} & \$\textbf{2.77} & \$\textbf{21.60} & \$\textbf{63.92} & \$\textbf{110.92}
+%  & \$\textbf{0.88} & \$\textbf{3.55} & \$\textbf{28.57} & \$\textbf{75.61} & \$\textbf{83.42}
+%  & \$\textbf{0.75} & \$\textbf{2.41} & \$\textbf{33.69} & \$\textbf{128.93} & \$\textbf{5.17} \\
+% \bottomrule
+% \end{tabular}%
+% }
+% \vspace{0.2cm}
+% \caption{MCP-Bench Parallel and Sequential Scaling Experiment Costs.}
+% \label{tab:mcp-bench-parallel-seq-costs}
+% \end{table*}
+

@@ -1,0 +1,28 @@
+\begin{table}[h]
+\centering
+\small
+\caption{Composition of General AgentBench}
+\label{tab:composition}
+\resizebox{0.9\linewidth}{!}{%
+\begin{tabular}{llrr}
+\toprule
+\textbf{Domain} & \textbf{Dataset} & \textbf{Original} & \textbf{Sampled} \\
+\midrule
+\multirow{2}{*}{Search}
+  & BrowseComp   & 1266 & 124\\
+  & WebVoyager   & 643  & 65 \\
+\midrule
+\multirow{2}{*}{Coding}
+  & SWE-Bench Verified & 500 & 50 \\
+  & Terminal-Bench     & 230 & 80 \\
+\midrule
+Reason
+  & MathHay            & 602 & 75 \\
+\midrule
+\multirow{2}{*}{Tool-Calling}
+  & Tau2-Bench         & 278 & 50 \\
+  & MCP-Bench          & 104 & 52 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}

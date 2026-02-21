@@ -1,0 +1,91 @@
+\section{General AgentBench}
+
+In this section, we introduce the construction of General AgentBench (Section~\ref{2.1}) and the unified evaluation framework (Section~\ref{2.2} ). Detailed prompt templates, tool specifications, and the unified policy are deferred to the Appendix~\ref{appendix:prompt}.
+
+% \subsection{Domains and Sources}\label{2.1}
+% Omni AgenticBench covers four major task categories: \textbf{Coding}, \textbf{Search}, \textbf{Tool-use}, and \textbf{Reason}. We select data sources that are widely used as reference benchmarks when new proprietary or open-weight models are released to ensure the quality. Table \ref{tab:composition} reports the statistics of our benchmark. 
+
+% \cx{need to discuss what the role of data sources are for us}\xiaochuan{check}
+
+% \cx{always use section intro to keep reader organized, you have space else where}
+
+\subsection{Domains and Sources}\label{2.1}
+
+Our benchmark spans four task domains: \textbf{Coding}, \textbf{Search}, \textbf{Tool-use}, and \textbf{Reason}. These domains reflect common real-world applications such as software engineering, information seeking, service workflows, and analytical reasoning, positioning General AgentBench as an initial step toward evaluating general-purpose agents in open-ended and unified settings. Table~\ref{tab:composition} summarizes the benchmark composition.
+
+\input{tables/dataset}
+
+\paragraph{Coding}
+We include tasks from SWE-Bench Verified \cite{openai_swebench_verified_2024} and Terminal Bench, which evaluate an agent’s ability to analyze production-level software issues, reason over long instructions, and iteratively interact with execution environments to reach a correct final state.
+
+\paragraph{Search}
+The search domain includes tasks from BrowseComp \cite{wei2025browsecomp} and WebVoyager \cite{he2024webvoyager}. These benchmarks assess an agent’s ability to identify missing information, decide when additional search steps are needed, and navigate long, evolving web contexts, going beyond static retrieval or single-turn question answering.
+
+\paragraph{Tool-use}
+For tool-use, we adopt Tau2-Bench \cite{barres2025tau2} and MCP-Bench \cite{wang2025mcpbench}, both of which provide rich tool suites requiring models to select, invoke, and coordinate multiple tools. These tasks emphasize structured tool calling and multi-step planning in realistic service and workflow scenarios.
+
+\paragraph{Reason}
+For long-context reasoning, we use MathHay \cite{wang2024mathhay}, which constructs queries by embedding relevant mathematical documents into noisy long-context haystacks. This benchmark isolates sustained reasoning over long inputs without relying on external tool execution, complementing the other domains.
+
+% \cx{the discussion of these four existing categoties and benchmarks can be much shorter, more details can be moved to appendix, just general introduction are needed (and some highlight of why each task is good). Thus we have more space for our stuff.}\xiaochuan{check}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.93\linewidth]{figs/bench_construction.pdf}
+    \caption{\textbf{Illustration of how General AgentBench covers a wide range of task categories while providing a unified interface to simulate real-world user interactions.} The green region indicates the specific task currently being handled by the agent (e.g., a search task). Orange boxes denote other clients and servers that remain active and responsive but are not directly involved in the current interaction. Red indicates that other domain-specific data are excluded.}
+    \label{fig:omni-setting}
+\end{figure}
+
+\input{tables/omni_only_main_results}
+
+\subsection{Unified Realistic Evaluation Framework}\label{2.2}
+
+% These choices reflect three fundamental properties of real-world agent usage: cross-domain task diversity, comprehensive skill requirements, and dynamically evolving multi-turn interactions.
+
+To support realistic evaluation of general LLM agents, we design a unified framework that exposes all tasks and tools through a shared interaction interface. These choices reflect three fundamental properties of real-world agent usage: cross-domain task diversity, comprehensive skill requirements, and dynamically evolving multi-turn interactions. An overview of the framework is illustrated in Figure~\ref{fig:omni-setting}.
+
+\paragraph{Unified tool interface.}
+In practical deployments, agents must select appropriate tools from a large pool without prior knowledge of task domains. To reflect this setting, we adopt the Model Context Protocol (MCP) \cite{mcp} as the backbone of our framework. Each benchmark environment is instantiated as an MCP server, while all servers are centrally managed by a unified Host. The Host maintains a global tool registry that records all available tools and their corresponding server mappings, presenting the agent with a single, unified tool space across all domains.
+
+\paragraph{Centralized interaction abstraction.}
+The Host serves as the sole interaction interface for the general agent, abstracting away individual benchmark implementations. When the agent invokes a tool, the Host resolves the call via the tool registry and routes the request to the appropriate server for execution. 
+
+% This abstraction prevents the agent from directly accessing domain-specific environments and eliminates implicit domain cues, encouraging agents to infer task structure and tool relevance purely from interaction context.
+
+\paragraph{Evolving interaction context.}
+Because all tools and benchmark environments are exposed simultaneously, the unified tool descriptions alone can span tens of thousands of tokens. When combined with user queries and accumulated multi-turn interaction histories, the resulting context naturally grows into the long-context regime. In this setting, agents must reason over heterogeneous information sources, including task instructions, tool documentation, execution feedback, and their own prior decisions. This distinguishes agentic interaction from many existing long-context benchmarks that focus on static, single-turn question answering or summarization with short outputs. We provide further long-context study in Appendix ~\ref{appendix:long_compare}
+
+\paragraph{Execution process.}
+For each evaluation instance, the framework provides it to the agent together with the unified policy and toolset as the context. All benchmark servers (e.g., Docker-based environments in the coding domain) are instantiated simultaneously and remain idle while awaiting requests from the agent. When the agent issues a tool call, the Host routes the request to the corresponding server, executes the tool, and returns the result in a unified response format. Tool execution is decoupled from task type: even if a task is search-oriented, code-related tool calls can still be executed by the environment, returning valid outputs despite having no direct relevance to the final solution. This design intentionally exposes the agent to a realistic setting where incorrect or irrelevant tool usage remains possible.
+
+The agent interacts with the framework over multiple turns until producing a final answer. During interaction, we monitor execution signals (e.g., terminal outputs) and regulate the interaction budget, enabling additional computation or extended reasoning when applicable (Section~\ref{4.1}). The final answer is then forwarded to the corresponding benchmark server for correctness evaluation.
+
+% Together, these properties differentiate Omni AgenticBench from prior evaluation settings that isolate individual tasks, restrict tool access, or assume static interaction paradigms. As a result, performance measured under our unified framework better reflects agent behavior in realistic, open-ended user interactions. We further analyze the implications of these properties empirically in Section~\ref{3.3}. 
+
+
+% \cx{we need to spend way more space in 2.2 as this is our core method, rather than spending too much space in 2.1 about preliminary.}\xiaochuan{check}
+
+% \cx{this subsection focuses too much on the differences with one benchmark, in fact, give the story line, long-context benchmarks may not even be the most relevant related work... single agent tasks are... Instead of focusing too much on differences with one line of work, use this space to state the properties, advnatages and benefits of our work, and in each benefits we can make a contrast with previous tasks. Also maybe we should merge 2.3 and 2.2 as 2.3 is a reflection of 2.2}\xiaochuan{check}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.99\linewidth]{figs/omni_agenticbench_main.pdf}
+    \caption{Relative performance change across domains from the Baseline ($B$) specialized agent setting to the general agent ($G$) setting with unified context and tools. Negative values indicate performance degradation under the General AgentBench.}
+    \label{fig:domain_degradation}
+\end{figure*}
+
+\subsection{Experimental details}
+% \cx{this is kind of experiemntal detail or benchmark constrution and more proper in sec 2?}\xiaochuan{check}
+Our evaluation covers a total of ten frontier language models. Among open-source models, we include several high-performing systems such as Qwen3-235B \cite{yang2025qwen3} and DeepSeek-R1 \cite{guo2025deepseek}, as well as more recent models with novel attention mechanisms, including Qwen3-Next \cite{qwen3next} and DeepSeek-v3.2 \cite{liu2025deepseekv3.2}. For proprietary models, we consider both efficiency-oriented variants (e.g., Gemini 2.5 Flash \cite{comanici2025gemini}) and models optimized for complex reasoning (e.g., GPT-5 \cite{openai_gpt5} and Claude Sonnet 4.5 \cite{anthropic2025claude45}). We access these models via Amazon Bedrock \footnote{\url{https://aws.amazon.com/bedrock/pricing/}} and the Hugging Face Inference API .\footnote{\url{https://huggingface.co/docs/inference-providers/en/index}} For all evaluations, we fix the decoding temperature to 0.7 and ensure that each model’s native context length  exceeds the maximum context length required by the benchmark.
+
+% This selection enables a systematic evaluation of emerging attention architectures in realistic agentic task environments, while allowing direct comparison with conventional attention mechanisms. 
+
+% It is therefore necessary to explicitly distinguish long-context model performance in agentic settings from that in traditional long-context benchmarks.
+
+% This makes Omni AgenticBench a rigorous testbed for agentic long-horizon capabilities. 
+% Crucially, ``agentic long-context'' differs fundamentally from previous long-context benchmarks, which primarily evaluate single-turn, long-input comprehension. 
+
+
+
+% In contrast, Omni AgenticBench grounds long-context evaluation in dynamic scenarios. Agentic tasks inherently generate expansive contexts through multi-turn interactions where the model must maintain a consistent trajectory. This shift moves beyond static assessment to measure a model’s ability to solve complex problems under realistic constraints. We provide further quantitative analysis in Section \ref{3.3}.
+
